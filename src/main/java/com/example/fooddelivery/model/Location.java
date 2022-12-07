@@ -19,5 +19,5 @@ public class Location {
     private String address;
 
     @ManyToOne
-    private Restaurant restaurant_id;
+    private Restaurant restaurant;
 }

@@ -8,15 +8,17 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-public class Notification {
-
+public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Boolean seen;
-    private String notificationType;
+    private Double stars;
+    private String comment;
 
     @ManyToOne
-    private Order order;
+    private ClientUser clientUser;
+
+    @ManyToOne
+    private Restaurant restaurant;
 
 }

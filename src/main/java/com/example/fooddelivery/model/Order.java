@@ -5,6 +5,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -15,15 +18,29 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-//    @ManyToOne
-//    private Delivery_User delivery_user_id;
-
     private String status;
 
-//    @ManyToOne
-//    private User user_id;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<Notification> notifications;
 
-//    @ManyToOne
-//    private History history_id;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinTable(name = "order_products", joinColumns = {
+            @JoinColumn(name = "order_id", referencedColumnName = "id",
+            nullable = false, updatable = false)},
+            inverseJoinColumns = {
+            @JoinColumn(name = "product_id", referencedColumnName = "id",
+            nullable = false, updatable = false)})
+    private Set<Product> products = new HashSet<>();
+
+
+    @ManyToOne
+    private ClientUser clientUser;
+
+    @ManyToOne
+    private DeliveryUser deliveryUser;
+
+    @ManyToOne
+    private History history;
+
 }
