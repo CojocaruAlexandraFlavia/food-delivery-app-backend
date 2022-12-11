@@ -1,13 +1,16 @@
-package com.example.fooddelivery.model.dto;
+package com.example.fooddelivery.model.dto.user;
 
+import com.example.fooddelivery.enums.Role;
 import com.example.fooddelivery.model.ClientUser;
+import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.model.dto.ReviewDto;
+import com.example.fooddelivery.model.dto.UserAddressDto;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -24,6 +27,8 @@ public class ClientUserDto extends BaseUserDto{
         clientUserDto.setEmail(clientUser.getEmail());
         clientUserDto.setLastName(clientUser.getLastName());
         clientUserDto.setFirstName(clientUser.getFirstName());
+        clientUserDto.setRole(Role.ROLE_CLIENT_USER.toString());
+        clientUserDto.setPassword(clientUser.getPassword());
         if(clientUser.getAddresses() != null) {
             clientUserDto.setAddresses(clientUser.getAddresses()
                     .stream().map(UserAddressDto::entityToDto).collect(toList()));

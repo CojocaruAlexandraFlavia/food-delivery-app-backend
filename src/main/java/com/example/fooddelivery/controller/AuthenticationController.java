@@ -1,12 +1,8 @@
 package com.example.fooddelivery.controller;
 
-import com.example.fooddelivery.model.ClientUser;
-import com.example.fooddelivery.model.dto.BaseUserDto;
-import com.example.fooddelivery.model.dto.ClientUserDto;
+import com.example.fooddelivery.model.*;
+import com.example.fooddelivery.model.dto.user.*;
 import com.example.fooddelivery.service.BaseUserService;
-import com.example.fooddelivery.model.BaseUser;
-import com.example.fooddelivery.model.LoginResponse;
-import com.example.fooddelivery.model.UsernameAndPasswordAuthRequest;
 import com.example.fooddelivery.service.ClientUserService;
 import com.example.fooddelivery.util.JwtUtils;
 import org.jetbrains.annotations.NotNull;
@@ -18,9 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -47,7 +41,7 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@NotNull @RequestBody UsernameAndPasswordAuthRequest request) {
 
-        Optional<BaseUser> optionalUser = baseUserService.findUserByEmail(request.getEmail());
+        Optional<BaseUserDto> optionalUser = baseUserService.login(request);
         if(optionalUser.isEmpty() ||
                 !passwordEncoder.matches(request.getPassword(), optionalUser.get().getPassword())) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -57,8 +51,10 @@ public class AuthenticationController {
                     new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtUtils.generateJwtToken(authentication);
+
         LoginResponse response = new LoginResponse();
         response.setToken(token);
+        response.setUser(optionalUser.get());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
@@ -69,6 +65,15 @@ public class AuthenticationController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(ClientUserDto.entityToDto(user), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-info-from-token/{token}")
+    public ResponseEntity<BaseUserDto> getInfoFromToken(@PathVariable("token") String token) {
+        BaseUserDto result = baseUserService.getInfoFromToken(token);
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

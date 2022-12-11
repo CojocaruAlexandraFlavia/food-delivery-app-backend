@@ -3,7 +3,7 @@ package com.example.fooddelivery.service;
 import com.example.fooddelivery.enums.Role;
 import com.example.fooddelivery.model.BaseUser;
 import com.example.fooddelivery.model.ClientUser;
-import com.example.fooddelivery.model.dto.BaseUserDto;
+import com.example.fooddelivery.model.dto.user.BaseUserDto;
 import com.example.fooddelivery.repository.BaseUserRepository;
 import com.example.fooddelivery.repository.ClientUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
