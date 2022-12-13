@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -16,7 +17,6 @@ public class Product {
     private Double price;
     private String name;
     private Double discount;
-    private Double quantity;
     private String ingredients;
 
     @ManyToOne
@@ -26,9 +26,9 @@ public class Product {
     private Restaurant restaurant;
 
     @ManyToMany(mappedBy = "products", cascade = CascadeType.ALL)
-    private Set<Order> orders;
-
-    @ManyToMany(mappedBy = "products", cascade = CascadeType.ALL)
     private Set<ClientUser> clientUsers;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<OrderProduct> orders;
 
 }
