@@ -29,6 +29,7 @@ public class ClientUserDto extends BaseUserDto{
         clientUserDto.setFirstName(clientUser.getFirstName());
         clientUserDto.setRole(Role.ROLE_CLIENT_USER.toString());
         clientUserDto.setPassword(clientUser.getPassword());
+
         if(clientUser.getAddresses() != null) {
             clientUserDto.setAddresses(clientUser.getAddresses()
                     .stream().map(UserAddressDto::entityToDto).collect(toList()));
@@ -47,6 +48,7 @@ public class ClientUserDto extends BaseUserDto{
         } else {
             clientUserDto.setOrders(new ArrayList<>());
         }
+
         return clientUserDto;
     }
 

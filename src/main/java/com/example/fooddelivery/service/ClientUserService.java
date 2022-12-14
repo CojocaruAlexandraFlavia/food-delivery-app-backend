@@ -41,4 +41,8 @@ public class ClientUserService {
         }
         return null;
     }
+    public Optional<ClientUser> findClientUserById(Long id){
+        return clientUserRepository.findById(id);
+    }
+
 }

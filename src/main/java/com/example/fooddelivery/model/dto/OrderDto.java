@@ -16,14 +16,18 @@ import static java.util.stream.Collectors.toList;
 public class OrderDto {
 
     private String status;
+    private String number;
     private List<NotificationDto> notifications;
     private List<OrderProductDto> products;
     private Long clientUserId;
     private Long deliveryUserId;
+    private Long historyId;
 
     public static @NotNull OrderDto entityToDto(@NotNull Order order) {
         OrderDto dto = new OrderDto();
         dto.setStatus(order.getStatus());
+        dto.setNumber(order.getNumber());
+
         if(order.getProducts() != null) {
             dto.setProducts(order.getProducts()
                     .stream().map(OrderProductDto::entityToDto).collect(toList()));
@@ -38,6 +42,7 @@ public class OrderDto {
         }
         dto.setClientUserId(order.getClientUser().getId());
         dto.setDeliveryUserId(order.getDeliveryUser().getId());
+        dto.setHistoryId(order.getHistory().getId());
         return dto;
     }
 
