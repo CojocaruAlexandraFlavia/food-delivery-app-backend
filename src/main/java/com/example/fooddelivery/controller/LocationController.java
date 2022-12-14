@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-import static com.example.fooddelivery.model.dto.LocationDto.convertEntityToDto;
+import static com.example.fooddelivery.model.dto.LocationDto.entityToDto;
 
 @RestController
 @RequestMapping("/location")
@@ -32,7 +32,7 @@ public class LocationController {
     public ResponseEntity<LocationDto> findLocationById(@PathVariable("id") Long id){
         Optional<Location> optionalLocation = locationService.findLocationById(id);
         if(optionalLocation.isPresent()){
-            LocationDto locationDto = convertEntityToDto(optionalLocation.get());
+            LocationDto locationDto = entityToDto(optionalLocation.get());
             return new ResponseEntity<>(locationDto, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

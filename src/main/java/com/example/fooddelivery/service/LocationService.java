@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-import static com.example.fooddelivery.model.dto.RestaurantDto.convertEntityToDto;
-
 @Service
 public class LocationService {
 
@@ -43,7 +41,7 @@ public class LocationService {
             location.setRestaurant(optionalRestaurant.get());
 
             location = locationRepository.save(location);
-            return LocationDto.convertEntityToDto(location);
+            return LocationDto.entityToDto(location);
         }
         return null;
     }
@@ -55,7 +53,7 @@ public class LocationService {
             location.setAvailability(locationDto.getAvailability());
             location.setCity(locationDto.getCity());
             location.setAddress(locationDto.getAddress());
-            return LocationDto.convertEntityToDto(locationRepository.save(location));
+            return LocationDto.entityToDto(locationRepository.save(location));
         }
         return null;
     }

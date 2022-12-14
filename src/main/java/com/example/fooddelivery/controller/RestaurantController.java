@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
-import static com.example.fooddelivery.model.dto.LocationDto.convertEntityToDto;
+import static com.example.fooddelivery.model.dto.LocationDto.entityToDto;
 
 @RestController
 @Transactional
@@ -35,7 +35,7 @@ public class RestaurantController {
     public ResponseEntity<RestaurantDto> findRestaurantById(@PathVariable("id") Long id){
         Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(id);
         if(optionalRestaurant.isPresent()){
-            RestaurantDto restaurantDto = RestaurantDto.convertEntityToDto(optionalRestaurant.get());
+            RestaurantDto restaurantDto = RestaurantDto.entityToDto(optionalRestaurant.get());
             return new ResponseEntity<>(restaurantDto, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -19,7 +19,7 @@ public class RestaurantDto {
     private Long restaurantManagerId;
     private List<LocationDto> locations;
 
-    public static @NotNull RestaurantDto convertEntityToDto(@NotNull Restaurant restaurant) {
+    public static @NotNull RestaurantDto entityToDto(@NotNull Restaurant restaurant) {
         RestaurantDto dto = new RestaurantDto();
         dto.setName(restaurant.getName());
         dto.setPhone_number(restaurant.getPhone_number());
@@ -27,7 +27,7 @@ public class RestaurantDto {
         dto.setRestaurantManagerId(restaurant.getRestaurantManager().getId());
 
         if(restaurant.getLocations() !=null){
-            dto.setLocations(restaurant.getLocations().stream().map(LocationDto::convertEntityToDto).collect(toList()));
+            dto.setLocations(restaurant.getLocations().stream().map(LocationDto::entityToDto).collect(toList()));
         }
 
         return dto;

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.example.fooddelivery.model.dto.RestaurantDto.convertEntityToDto;
+import static com.example.fooddelivery.model.dto.RestaurantDto.entityToDto;
 
 @Service
 public class RestaurantService {
@@ -52,7 +52,7 @@ public class RestaurantService {
             restaurant.setRestaurantManager((RestaurantManager) optionalRestaurantManager.get());
 
             restaurant = restaurantRepository.save(restaurant);
-            return convertEntityToDto(restaurant);
+            return entityToDto(restaurant);
         }
         return null;
     }
@@ -64,7 +64,7 @@ public class RestaurantService {
             restaurant.setName(restaurantDto.getName());
             restaurant.setPhone_number(restaurantDto.getPhone_number());
             restaurant.setRating(restaurantDto.getRating());
-            return convertEntityToDto(restaurantRepository.save(restaurant));
+            return entityToDto(restaurantRepository.save(restaurant));
         }
         return null;
     }
@@ -90,7 +90,7 @@ public class RestaurantService {
             l.setAddress(address);
             l.setRestaurant(restaurant);
             locationRepository.save(l);
-            return convertEntityToDto(restaurantRepository.save(restaurant));
+            return entityToDto(restaurantRepository.save(restaurant));
         }
         return null;
     }

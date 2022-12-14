@@ -15,7 +15,7 @@ public class LocationDto {
     private String address;
     private Long restaurantId;
 
-    public static @NotNull LocationDto convertEntityToDto(@NotNull Location location) {
+    public static @NotNull LocationDto entityToDto(@NotNull Location location) {
         LocationDto dto = new LocationDto();
         dto.setAvailability(location.getAvailability());
         dto.setCity(location.getCity());
