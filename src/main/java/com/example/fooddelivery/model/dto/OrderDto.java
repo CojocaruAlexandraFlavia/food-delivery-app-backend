@@ -17,8 +17,10 @@ public class OrderDto {
 
     private String status;
     private String number;
+
     private List<NotificationDto> notifications;
     private List<OrderProductDto> products;
+
     private Long clientUserId;
     private Long deliveryUserId;
     private Long historyId;

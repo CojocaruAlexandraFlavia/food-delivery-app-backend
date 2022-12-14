@@ -51,6 +51,7 @@ public class OrderService {
             //save order
             order.setStatus(orderDto.getStatus());
             order.setNumber(orderDto.getNumber());
+
             order.setClientUser(optionalClientUser.get());
             order.setDeliveryUser(optionalDeliveryUser.get());
             order.setHistory(optionalHistory.get());

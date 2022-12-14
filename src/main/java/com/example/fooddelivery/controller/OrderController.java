@@ -57,7 +57,7 @@ public class OrderController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PutMapping("/add-order-product")
+    @PutMapping("/add-products")
     public ResponseEntity<OrderDto> addOrderProduct(@RequestBody AddOrderProductRequest addOrderProductRequest){
         OrderDto result = orderService.addOrderProduct(addOrderProductRequest.getOrderId(),
                 addOrderProductRequest.getOrderProductId(), addOrderProductRequest.getQuantity());

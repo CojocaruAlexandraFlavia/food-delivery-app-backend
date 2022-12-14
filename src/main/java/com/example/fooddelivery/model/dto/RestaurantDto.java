@@ -16,7 +16,9 @@ public class RestaurantDto {
     private String name;
     private Long phone_number;
     private Long rating;
+
     private Long restaurantManagerId;
+
     private List<LocationDto> locations;
 
     public static @NotNull RestaurantDto entityToDto(@NotNull Restaurant restaurant) {
@@ -24,6 +26,7 @@ public class RestaurantDto {
         dto.setName(restaurant.getName());
         dto.setPhone_number(restaurant.getPhone_number());
         dto.setRating(restaurant.getRating());
+
         dto.setRestaurantManagerId(restaurant.getRestaurantManager().getId());
 
         if(restaurant.getLocations() !=null){
