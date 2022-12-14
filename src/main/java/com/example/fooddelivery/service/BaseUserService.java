@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -37,7 +36,6 @@ public class BaseUserService implements UserDetailsService {
         } else throw new UsernameNotFoundException(email);
     }
 
-    @Transactional
     public Optional<BaseUser> findUserByEmail(String email) {
         return baseUserRepository.findByEmail(email);
     }
@@ -50,9 +48,8 @@ public class BaseUserService implements UserDetailsService {
             if(optionalBaseUser.isPresent()) {
                 BaseUser baseUser = optionalBaseUser.get();
                 return switchByRole(baseUser);
-            } else {
-                return null;
             }
+            return null;
         }
         return null;
     }

@@ -32,7 +32,4 @@ public class Order {
     @ManyToOne
     private DeliveryUser deliveryUser;
 
-    @ManyToOne
-    private History history;
-
 }

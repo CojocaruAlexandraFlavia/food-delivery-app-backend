@@ -12,9 +12,6 @@ import java.util.List;
 @Setter
 public class DeliveryUser extends BaseUser{
 
-    @OneToOne
-    private History history;
-
     @OneToMany(mappedBy = "deliveryUser", cascade = CascadeType.ALL)
     private List<Order> orders;
 

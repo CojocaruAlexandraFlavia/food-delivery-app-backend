@@ -23,9 +23,6 @@ public class ClientUser extends BaseUser {
     @OneToMany(mappedBy = "clientUser", cascade = CascadeType.ALL)
     private List<Order> orders;
 
-    @OneToOne
-    private History history;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name = "users_favorite_products",
             joinColumns = {
