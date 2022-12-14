@@ -42,6 +42,10 @@ public class BaseUserService implements UserDetailsService {
         return baseUserRepository.findByEmail(email);
     }
 
+    public Optional<BaseUser> findUserById(Long id){
+        return baseUserRepository.findById(id);
+    }
+
     @Transactional
     public BaseUserDto getInfoFromToken(String token) {
         if(jwtUtils.validateJwtToken(token)) {
