@@ -16,8 +16,8 @@ public class Restaurant {
     private Long id;
 
     private String name;
-    private Long phone_number;
-    private Long rating;
+    private String phoneNumber;
+    private Double rating;
 
     @ManyToOne
     private RestaurantManager restaurantManager;
@@ -25,12 +25,17 @@ public class Restaurant {
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Location> locations;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurant")
     private List<Product> products;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
-
+    @PreRemove
+    public void preRemove() {
+        this.locations.forEach(location -> location.setRestaurant(null));
+        this.products.forEach(product -> product.setRestaurant(null));
+        this.reviews.forEach(review -> review.setRestaurant(null));
+    }
 
 }

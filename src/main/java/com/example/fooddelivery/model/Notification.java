@@ -1,5 +1,6 @@
 package com.example.fooddelivery.model;
 
+import com.example.fooddelivery.enums.NotificationType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,7 +15,9 @@ public class Notification {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Boolean seen;
-    private String notificationType;
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType notificationType;
 
     @ManyToOne
     private Order order;

@@ -1,22 +1,22 @@
 package com.example.fooddelivery.model.dto;
 
-import com.example.fooddelivery.model.*;
+import com.example.fooddelivery.model.Product;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
-
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProductDto {
 
+    private Long id;
     private Double price;
     private String name;
     private Double discount;
     private String ingredients;
+    private boolean availability;
 
     private Long categoryId;
     private String categoryName;
@@ -24,26 +24,18 @@ public class ProductDto {
     private Long restaurantId;
     private String restaurantName;
 
-    private Long clientUserId;
-
-    private List<OrderProductDto> orders;
-
-
     public static @NotNull ProductDto entityToDto(@NotNull Product product) {
         ProductDto dto = new ProductDto();
+        dto.setId(product.getId());
         dto.setName(product.getName());
         dto.setPrice(product.getPrice());
         dto.setDiscount(product.getDiscount());
         dto.setIngredients(product.getIngredients());
-
-        dto.setCategoryId(product.getCategory().getId());
+        dto.setAvailability(product.isAvailability());
         dto.setCategoryName(product.getCategory().getName());
 
-        dto.setRestaurantId(product.getRestaurant().getId());
-        dto.setRestaurantName(product.getRestaurant().getName());
-
-        if(product.getOrders() !=null){
-            dto.setOrders(product.getOrders().stream().map(OrderProductDto::entityToDto).collect(toList()));
+        if(product.getRestaurant() != null) {
+            dto.setRestaurantName(product.getRestaurant().getName());
         }
         return dto;
     }

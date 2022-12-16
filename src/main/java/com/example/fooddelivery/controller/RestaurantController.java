@@ -51,7 +51,8 @@ public class RestaurantController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<RestaurantDto> updateRestaurant(@PathVariable("id") Long id, @RequestBody RestaurantDto dto){
+    public ResponseEntity<RestaurantDto> updateRestaurant(@PathVariable("id") Long id,
+                                                          @RequestBody RestaurantDto dto){
         RestaurantDto result = restaurantService.updateRestaurant(id, dto);
         if(result == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -61,7 +62,8 @@ public class RestaurantController {
 
     @PutMapping("/add-location")
     public ResponseEntity<RestaurantDto> addLocation(@RequestBody AddLocationRequest addLocationRequest){
-        RestaurantDto result = restaurantService.addLocation(addLocationRequest.getRestaurantId(), addLocationRequest.getRestaurantManagerId(), addLocationRequest.getAddress());
+        RestaurantDto result = restaurantService.addLocation(addLocationRequest.getRestaurantId(),
+                addLocationRequest.getRestaurantManagerId(), addLocationRequest.getLocation());
         if(result == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

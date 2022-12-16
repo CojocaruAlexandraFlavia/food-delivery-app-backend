@@ -1,5 +1,7 @@
 package com.example.fooddelivery.service;
 
+import com.example.fooddelivery.enums.NotificationType;
+import com.example.fooddelivery.enums.OrderStatus;
 import com.example.fooddelivery.model.*;
 import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.OrderDto;
@@ -10,9 +12,11 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.EntityNotFoundException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-
-import static com.example.fooddelivery.model.dto.RestaurantDto.entityToDto;
 
 @Service
 public class OrderService {
@@ -21,16 +25,20 @@ public class OrderService {
     private final NotificationRepository notificationRepository;
     private final OrderProductRepository orderProductRepository;
 
-    private ClientUserService clientUserService;
-    private DeliveryUserService deliveryUserService;
-    private HistoryService historyService;
+    private final ProductService productService;
+
+    private final ClientUserService clientUserService;
+    private final DeliveryUserService deliveryUserService;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, NotificationRepository notificationRepository,
-                        OrderProductRepository productRepository) {
+                        OrderProductRepository productRepository, ProductService productService, ClientUserService clientUserService, DeliveryUserService deliveryUserService) {
         this.orderRepository = orderRepository;
         this.notificationRepository = notificationRepository;
         this.orderProductRepository = productRepository;
+        this.productService = productService;
+        this.clientUserService = clientUserService;
+        this.deliveryUserService = deliveryUserService;
     }
 
     public Optional<Order> findOrderById(Long id) {
@@ -45,23 +53,43 @@ public class OrderService {
         Order order = new Order();
         Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(orderDto.getClientUserId());
         Optional<DeliveryUser> optionalDeliveryUser = deliveryUserService.findDeliveryUserById(orderDto.getDeliveryUserId());
-        Optional<History> optionalHistory = historyService.findHistoryById(orderDto.getHistoryId());
 
         if(optionalClientUser.isPresent() && optionalDeliveryUser.isPresent()){
-            //save order
-            order.setStatus(orderDto.getStatus());
-            order.setNumber(orderDto.getNumber());
 
+            //set order number
+            Order lastSavedOrder = orderRepository.findFirstByOrderByIdDesc();
+            if(lastSavedOrder != null) {
+                order.setNumber(lastSavedOrder.getNumber().add(BigInteger.ONE));
+            } else {
+                order.setNumber(BigInteger.ONE);
+            }
+
+            //save order
+            order.setStatus(OrderStatus.RECEIVED);
             order.setClientUser(optionalClientUser.get());
             order.setDeliveryUser(optionalDeliveryUser.get());
-            order.setHistory(optionalHistory.get());
-            order = orderRepository.save(order);
+            Order savedOrder = orderRepository.save(order);
+
+            //save order products
+            List<OrderProduct> orderProducts = new ArrayList<>();
+            orderDto.getProducts().forEach(orderProductDto -> {
+                Optional<Product> optionalProduct = productService.findProductById(orderProductDto.getProductDto().getId());
+                OrderProduct orderProduct = new OrderProduct();
+                orderProduct.setQuantity(orderProductDto.getQuantity());
+                orderProduct.setOrder(savedOrder);
+                orderProduct.setProduct(optionalProduct.orElseThrow(EntityNotFoundException::new));
+                orderProducts.add(orderProduct);
+            });
+            List<OrderProduct> savedOrderProducts = orderProductRepository.saveAll(orderProducts);
+            savedOrder.setProducts(savedOrderProducts);
 
             //send notification
             Notification notification = new Notification();
-            notification.setOrder(order);
+            notification.setOrder(savedOrder);
+            notification.setNotificationType(NotificationType.ORDER_RECEIVED);
+            notification.setSeen(false);
             notificationRepository.save(notification);
-            return OrderDto.entityToDto(order);
+            return OrderDto.entityToDto(orderRepository.save(savedOrder));
         }
         return null;
     }
@@ -78,13 +106,11 @@ public class OrderService {
         return null;
     }
 
-    public OrderDto updateOrder(Long orderId, OrderDto orderDto){
+    public OrderDto updateOrder(Long orderId, String newStatus){
         Optional<Order> optionalOrder = findOrderById(orderId);
         if(optionalOrder.isPresent()){
             Order order = optionalOrder.get();
-            order.setStatus(orderDto.getStatus());
-            order.setNumber(orderDto.getNumber());
-
+            order.setStatus(OrderStatus.valueOf(newStatus));
             return OrderDto.entityToDto(orderRepository.save(order));
         }
         return null;

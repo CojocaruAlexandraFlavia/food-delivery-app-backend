@@ -6,5 +6,5 @@ import lombok.Data;
 public class AddLocationRequest {
     private Long restaurantId;
     private Long restaurantManagerId;
-    private String address;
+    private LocationDto location;
 }

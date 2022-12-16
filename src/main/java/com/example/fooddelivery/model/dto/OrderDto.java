@@ -5,9 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -16,18 +16,17 @@ import static java.util.stream.Collectors.toList;
 public class OrderDto {
 
     private String status;
-    private String number;
+    private BigInteger number;
 
     private List<NotificationDto> notifications;
     private List<OrderProductDto> products;
 
     private Long clientUserId;
     private Long deliveryUserId;
-    private Long historyId;
 
     public static @NotNull OrderDto entityToDto(@NotNull Order order) {
         OrderDto dto = new OrderDto();
-        dto.setStatus(order.getStatus());
+        dto.setStatus(order.getStatus().toString());
         dto.setNumber(order.getNumber());
 
         if(order.getProducts() != null) {
@@ -44,7 +43,6 @@ public class OrderDto {
         }
         dto.setClientUserId(order.getClientUser().getId());
         dto.setDeliveryUserId(order.getDeliveryUser().getId());
-        dto.setHistoryId(order.getHistory().getId());
         return dto;
     }
 

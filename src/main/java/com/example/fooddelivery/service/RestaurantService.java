@@ -4,12 +4,15 @@ import com.example.fooddelivery.model.BaseUser;
 import com.example.fooddelivery.model.Location;
 import com.example.fooddelivery.model.Restaurant;
 import com.example.fooddelivery.model.RestaurantManager;
+import com.example.fooddelivery.model.dto.LocationDto;
 import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.repository.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static com.example.fooddelivery.model.dto.RestaurantDto.entityToDto;
@@ -46,13 +49,26 @@ public class RestaurantService {
 
         if(optionalRestaurantManager.isPresent()){
             //save restaurant
+            RestaurantManager restaurantManager = (RestaurantManager) optionalRestaurantManager.get();
             restaurant.setName(restaurantDto.getName());
-            restaurant.setPhone_number(restaurantDto.getPhone_number());
-            restaurant.setRating(restaurantDto.getRating());
-            restaurant.setRestaurantManager((RestaurantManager) optionalRestaurantManager.get());
+            restaurant.setPhoneNumber(restaurantDto.getPhoneNumber());
+            restaurant.setRating(0.0);
+            restaurant.setRestaurantManager(restaurantManager);
+            Restaurant savedRestaurant = restaurantRepository.save(restaurant);
 
-            restaurant = restaurantRepository.save(restaurant);
-            return entityToDto(restaurant);
+            //save restaurant locations
+            List<Location> locations = new ArrayList<>();
+            restaurantDto.getLocations().forEach(locationDto -> {
+                Location location = new Location();
+                location.setRestaurant(savedRestaurant);
+                location.setAddress(locationDto.getAddress());
+                location.setCity(locationDto.getCity());
+                location.setAvailability(true);
+                locations.add(location);
+            });
+            List<Location> savedRestaurantLocations = locationRepository.saveAll(locations);
+            savedRestaurant.setLocations(savedRestaurantLocations);
+            return entityToDto(restaurantRepository.save(savedRestaurant));
         }
         return null;
     }
@@ -62,7 +78,7 @@ public class RestaurantService {
         if(optionalRestaurant.isPresent()){
             Restaurant restaurant = optionalRestaurant.get();
             restaurant.setName(restaurantDto.getName());
-            restaurant.setPhone_number(restaurantDto.getPhone_number());
+            restaurant.setPhoneNumber(restaurantDto.getPhoneNumber());
             restaurant.setRating(restaurantDto.getRating());
             return entityToDto(restaurantRepository.save(restaurant));
         }
@@ -80,16 +96,17 @@ public class RestaurantService {
         return false;
     }
 
-    public RestaurantDto addLocation(Long restaurantId, Long restaurantManagerId, String address){
+    public RestaurantDto addLocation(Long restaurantId, Long restaurantManagerId, LocationDto locationDto){
         Optional<Restaurant> optionalRestaurant = findRestaurantById(restaurantId);
         Optional<BaseUser> optionalRestaurantManager = baseUserService.findUserById(restaurantManagerId);
 
         if(optionalRestaurant.isPresent() && optionalRestaurantManager.isPresent()){
             Restaurant restaurant = optionalRestaurant.get();
-            Location l = new Location();
-            l.setAddress(address);
-            l.setRestaurant(restaurant);
-            locationRepository.save(l);
+            Location location = new Location();
+            location.setAddress(locationDto.getAddress());
+            location.setCity(locationDto.getCity());
+            location.setRestaurant(restaurant);
+            locationRepository.save(location);
             return entityToDto(restaurantRepository.save(restaurant));
         }
         return null;

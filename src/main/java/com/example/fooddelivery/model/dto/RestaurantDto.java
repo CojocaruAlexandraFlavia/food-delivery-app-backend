@@ -14,8 +14,8 @@ import static java.util.stream.Collectors.toList;
 public class RestaurantDto {
 
     private String name;
-    private Long phone_number;
-    private Long rating;
+    private String phoneNumber;
+    private Double rating;
 
     private Long restaurantManagerId;
 
@@ -24,12 +24,12 @@ public class RestaurantDto {
     public static @NotNull RestaurantDto entityToDto(@NotNull Restaurant restaurant) {
         RestaurantDto dto = new RestaurantDto();
         dto.setName(restaurant.getName());
-        dto.setPhone_number(restaurant.getPhone_number());
+        dto.setPhoneNumber(restaurant.getPhoneNumber());
         dto.setRating(restaurant.getRating());
 
         dto.setRestaurantManagerId(restaurant.getRestaurantManager().getId());
 
-        if(restaurant.getLocations() !=null){
+        if(restaurant.getLocations() != null){
             dto.setLocations(restaurant.getLocations().stream().map(LocationDto::entityToDto).collect(toList()));
         }
 

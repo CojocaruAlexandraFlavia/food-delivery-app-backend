@@ -17,7 +17,7 @@ import java.util.Optional;
 @RequestMapping("/order")
 public class OrderController {
 
-    private OrderService orderService;
+    private final OrderService orderService;
 
     @Autowired
     public OrderController(OrderService orderService) {
@@ -48,9 +48,10 @@ public class OrderController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<OrderDto> updateOrder(@PathVariable("id") Long id, @RequestBody OrderDto dto){
-        OrderDto result = orderService.updateOrder(id, dto);
+    @PatchMapping("/change-status/{orderId}/{status}")
+    public ResponseEntity<OrderDto> changeOrderStatus(@PathVariable("orderId") Long id,
+                                                      @PathVariable("status") String newStatus){
+        OrderDto result = orderService.updateOrder(id, newStatus);
         if(result == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

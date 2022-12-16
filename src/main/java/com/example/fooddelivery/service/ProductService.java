@@ -54,8 +54,9 @@ public class ProductService {
 
             product.setCategory(optionalCategory.get());
             product.setRestaurant(optionalRestaurant.get());
-            //product.setClientUser(optionalClientUser.get());
+            product.setAvailability(true);
             product = productRepository.save(product);
+            return ProductDto.entityToDto(product);
         }
         return null;
     }
@@ -74,15 +75,17 @@ public class ProductService {
         return null;
     }
 
-    public boolean deleteProduct(Long productId){
+    public ProductDto changeProductAvailability(Long productId){
         if(productId != null){
             Optional<Product> optionalProduct = findProductById(productId);
             if(optionalProduct.isPresent()){
-                productRepository.delete(optionalProduct.get());
-                return true;
+                Product product = optionalProduct.get();
+                product.setAvailability(!product.isAvailability());
+                product = productRepository.save(product);
+                return ProductDto.entityToDto(product);
             }
         }
-        return false;
+        return null;
     }
 
     public ProductDto addOrderProduct(Long productId, Long orderProductId, int quantity){

@@ -18,6 +18,7 @@ public class Product {
     private String name;
     private Double discount;
     private String ingredients;
+    private boolean availability;
 
     @ManyToOne
     private Category category;

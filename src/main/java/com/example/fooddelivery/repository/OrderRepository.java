@@ -17,4 +17,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void deleteById(@NotNull Long id);
 
     Optional<Order> findByStatus(Order status);
+
+    Order findFirstByOrderByIdDesc();
 }
