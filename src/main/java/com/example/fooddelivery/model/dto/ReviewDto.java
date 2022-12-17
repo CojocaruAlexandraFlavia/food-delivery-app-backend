@@ -14,12 +14,17 @@ public class ReviewDto {
     private Long clientUserId;
     private Long restaurantId;
 
+    private String clientFirstName;
+    private String clientLastName;
+
     public static @NotNull ReviewDto entityToDto(@NotNull Review review) {
         ReviewDto dto = new ReviewDto();
         dto.setComment(review.getComment());
         dto.setStars(review.getStars());
         dto.setClientUserId(review.getClientUser().getId());
         dto.setRestaurantId(review.getRestaurant().getId());
+        dto.setClientLastName(review.getClientUser().getLastName());
+        dto.setClientFirstName(review.getClientUser().getFirstName());
         return dto;
     }
 }
