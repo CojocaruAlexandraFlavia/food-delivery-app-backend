@@ -1,8 +1,12 @@
 package com.example.fooddelivery.service;
 
-import com.example.fooddelivery.model.*;
+import com.example.fooddelivery.model.Category;
+import com.example.fooddelivery.model.OrderProduct;
+import com.example.fooddelivery.model.Product;
+import com.example.fooddelivery.model.Restaurant;
 import com.example.fooddelivery.model.dto.ProductDto;
-import com.example.fooddelivery.repository.*;
+import com.example.fooddelivery.repository.OrderProductRepository;
+import com.example.fooddelivery.repository.ProductRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -45,7 +49,6 @@ public class ProductService {
         //Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(productDto.getClientUserId());
 
         if(optionalCategory.isPresent() && optionalRestaurant.isPresent() ){
-                //&& optionalClientUser.isPresent()){
             //save product
             product.setPrice(productDto.getPrice());
             product.setName(productDto.getName());

@@ -3,6 +3,7 @@ package com.example.fooddelivery.model.dto.user;
 import com.example.fooddelivery.enums.Role;
 import com.example.fooddelivery.model.ClientUser;
 import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.model.dto.ProductDto;
 import com.example.fooddelivery.model.dto.ReviewDto;
 import com.example.fooddelivery.model.dto.UserAddressDto;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class ClientUserDto extends BaseUserDto{
     private List<UserAddressDto> addresses;
     private List<ReviewDto> reviews;
     private List<OrderDto> orders;
+    private List<ProductDto> favoriteProducts;
 
     public static @NotNull ClientUserDto entityToDto(@NotNull ClientUser clientUser) {
         ClientUserDto clientUserDto = new ClientUserDto();
@@ -48,7 +50,12 @@ public class ClientUserDto extends BaseUserDto{
         } else {
             clientUserDto.setOrders(new ArrayList<>());
         }
-
+        if(clientUser.getProducts() != null) {
+            clientUserDto.setFavoriteProducts(clientUser.getProducts()
+                    .stream().map(ProductDto::entityToDto).collect(toList()));
+        } else {
+            clientUserDto.setFavoriteProducts(new ArrayList<>());
+        }
         return clientUserDto;
     }
 

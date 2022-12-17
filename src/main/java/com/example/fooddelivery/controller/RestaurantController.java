@@ -10,9 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
-
-import static com.example.fooddelivery.model.dto.LocationDto.entityToDto;
 
 @RestController
 @Transactional
@@ -69,5 +68,10 @@ public class RestaurantController {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
 
+    }
+
+    @GetMapping("/get-all")
+    public ResponseEntity<List<RestaurantDto>> getAllRestaurants() {
+        return new ResponseEntity<>(restaurantService.getAllRestaurants(), HttpStatus.OK);
     }
 }

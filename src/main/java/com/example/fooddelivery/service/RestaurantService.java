@@ -6,7 +6,10 @@ import com.example.fooddelivery.model.Restaurant;
 import com.example.fooddelivery.model.RestaurantManager;
 import com.example.fooddelivery.model.dto.LocationDto;
 import com.example.fooddelivery.model.dto.RestaurantDto;
-import com.example.fooddelivery.repository.*;
+import com.example.fooddelivery.repository.LocationRepository;
+import com.example.fooddelivery.repository.ProductRepository;
+import com.example.fooddelivery.repository.RestaurantRepository;
+import com.example.fooddelivery.repository.ReviewRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.example.fooddelivery.model.dto.RestaurantDto.entityToDto;
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class RestaurantService {
@@ -113,4 +117,8 @@ public class RestaurantService {
     }
 
 
+    public List<RestaurantDto> getAllRestaurants() {
+        List<Restaurant> allRestaurants = restaurantRepository.findAll();
+        return allRestaurants.stream().map(RestaurantDto::entityToDto).collect(toList());
+    }
 }

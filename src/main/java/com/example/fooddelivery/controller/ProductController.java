@@ -2,7 +2,10 @@ package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Product;
 import com.example.fooddelivery.model.dto.AddOrderProductRequest;
+import com.example.fooddelivery.model.dto.AddProductToFavoritesRequest;
 import com.example.fooddelivery.model.dto.ProductDto;
+import com.example.fooddelivery.model.dto.user.ClientUserDto;
+import com.example.fooddelivery.service.ClientUserService;
 import com.example.fooddelivery.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,10 +21,12 @@ import java.util.Optional;
 public class ProductController {
 
     private final ProductService productService;
+    private final ClientUserService clientUserService;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ClientUserService clientUserService) {
         this.productService = productService;
+        this.clientUserService = clientUserService;
     }
 
     @PostMapping("/save")
@@ -67,6 +72,15 @@ public class ProductController {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
 
+    }
+
+    @PostMapping("/add-product-to-client-favorites")
+    public ResponseEntity<ClientUserDto> addProductToFavorite(@RequestBody AddProductToFavoritesRequest request) {
+        ClientUserDto result = clientUserService.addProductToFavorite(request);
+        if(result == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }

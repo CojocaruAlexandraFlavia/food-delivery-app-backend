@@ -33,4 +33,8 @@ public class ClientUser extends BaseUser {
                             nullable = false, updatable = false)})
     private Set<Product> products = new HashSet<>();
 
+    public void addProductToFavoritesList(Product product) {
+        products.add(product);
+    }
+
 }
