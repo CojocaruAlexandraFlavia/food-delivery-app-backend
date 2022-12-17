@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
@@ -16,10 +17,9 @@ public class RestaurantDto {
     private String name;
     private String phoneNumber;
     private Double rating;
-
     private Long restaurantManagerId;
-
     private List<LocationDto> locations;
+    private List<ReviewDto> reviews;
 
     public static @NotNull RestaurantDto entityToDto(@NotNull Restaurant restaurant) {
         RestaurantDto dto = new RestaurantDto();
@@ -31,6 +31,14 @@ public class RestaurantDto {
 
         if(restaurant.getLocations() != null){
             dto.setLocations(restaurant.getLocations().stream().map(LocationDto::entityToDto).collect(toList()));
+        } else {
+            dto.setLocations(new ArrayList<>());
+        }
+
+        if(restaurant.getReviews() != null) {
+            dto.setReviews(restaurant.getReviews().stream().map(ReviewDto::entityToDto).collect(toList()));
+        } else {
+            dto.setReviews(new ArrayList<>());
         }
 
         return dto;
