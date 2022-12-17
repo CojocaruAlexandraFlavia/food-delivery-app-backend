@@ -1,7 +1,7 @@
 package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Order;
-import com.example.fooddelivery.model.dto.AddOrderProductRequest;
+import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
 import com.example.fooddelivery.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;

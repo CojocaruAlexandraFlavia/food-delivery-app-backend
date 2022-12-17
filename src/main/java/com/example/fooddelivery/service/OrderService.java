@@ -99,9 +99,8 @@ public class OrderService {
         if(optionalNotification.isPresent()){
             Notification notification = optionalNotification.get();
             notification.setNotificationType(notification.getNotificationType());
-
             notification = notificationRepository.save(notification);
-            return new NotificationDto();
+            return NotificationDto.entityToDto(notification);
         }
         return null;
     }

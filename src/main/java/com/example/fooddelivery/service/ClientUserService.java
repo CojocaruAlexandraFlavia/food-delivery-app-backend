@@ -4,7 +4,7 @@ import com.example.fooddelivery.enums.Role;
 import com.example.fooddelivery.model.BaseUser;
 import com.example.fooddelivery.model.ClientUser;
 import com.example.fooddelivery.model.Product;
-import com.example.fooddelivery.model.dto.AddProductToFavoritesRequest;
+import com.example.fooddelivery.model.dto.requests.AddProductToFavoritesRequest;
 import com.example.fooddelivery.model.dto.user.BaseUserDto;
 import com.example.fooddelivery.model.dto.user.ClientUserDto;
 import com.example.fooddelivery.repository.BaseUserRepository;

@@ -1,7 +1,8 @@
 package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Restaurant;
-import com.example.fooddelivery.model.dto.AddLocationRequest;
+import com.example.fooddelivery.model.dto.ReviewDto;
+import com.example.fooddelivery.model.dto.requests.AddLocationRequest;
 import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,5 +74,14 @@ public class RestaurantController {
     @GetMapping("/get-all")
     public ResponseEntity<List<RestaurantDto>> getAllRestaurants() {
         return new ResponseEntity<>(restaurantService.getAllRestaurants(), HttpStatus.OK);
+    }
+
+    @PostMapping("/add-review")
+    public ResponseEntity<ReviewDto> addClientReview(@RequestBody ReviewDto review) {
+        ReviewDto result = restaurantService.addClientReview(review);
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

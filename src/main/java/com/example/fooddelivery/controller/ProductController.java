@@ -1,8 +1,8 @@
 package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Product;
-import com.example.fooddelivery.model.dto.AddOrderProductRequest;
-import com.example.fooddelivery.model.dto.AddProductToFavoritesRequest;
+import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
+import com.example.fooddelivery.model.dto.requests.AddProductToFavoritesRequest;
 import com.example.fooddelivery.model.dto.ProductDto;
 import com.example.fooddelivery.model.dto.user.ClientUserDto;
 import com.example.fooddelivery.service.ClientUserService;

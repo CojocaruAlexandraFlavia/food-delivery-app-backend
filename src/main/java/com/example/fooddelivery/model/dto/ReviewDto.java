@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class ReviewDto {
 
-    private Double stars;
+    private int stars;
     private String comment;
     private Long clientUserId;
     private Long restaurantId;
