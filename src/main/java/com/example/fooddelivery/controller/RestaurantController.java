@@ -4,6 +4,9 @@ import com.example.fooddelivery.model.Restaurant;
 import com.example.fooddelivery.model.dto.ReviewDto;
 import com.example.fooddelivery.model.dto.requests.AddLocationRequest;
 import com.example.fooddelivery.model.dto.RestaurantDto;
+import com.example.fooddelivery.model.dto.user.ClientUserDto;
+import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
+import com.example.fooddelivery.model.dto.user.RestaurantManagerDto;
 import com.example.fooddelivery.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -84,4 +87,24 @@ public class RestaurantController {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @PostMapping("/add-manager")
+    public ResponseEntity<RestaurantManagerDto> addManagerUser(@RequestBody RestaurantManagerDto user) {
+        RestaurantManagerDto result = RestaurantManagerDto.entityToDto(restaurantService.addManagerUser(user));
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/add-deliver")
+    public ResponseEntity<DeliveryUserDto> addDeliveryUser(@RequestBody DeliveryUserDto user) {
+        DeliveryUserDto result = DeliveryUserDto.entityToDto(restaurantService.addDeliveryUser(user));
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+
 }

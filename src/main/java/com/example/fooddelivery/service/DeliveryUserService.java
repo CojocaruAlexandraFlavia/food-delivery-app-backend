@@ -6,6 +6,7 @@ import com.example.fooddelivery.model.DeliveryUser;
 import com.example.fooddelivery.model.dto.user.BaseUserDto;
 import com.example.fooddelivery.repository.BaseUserRepository;
 import com.example.fooddelivery.repository.DeliveryUserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +19,7 @@ public class DeliveryUserService {
     private final BaseUserRepository baseUserRepository;
     private final PasswordEncoder passwordEncoder;
 
-
+    @Autowired
     public DeliveryUserService(DeliveryUserRepository deliveryUserRepository, BaseUserRepository baseUserRepository,
                                PasswordEncoder passwordEncoder) {
         this.deliveryUserRepository = deliveryUserRepository;

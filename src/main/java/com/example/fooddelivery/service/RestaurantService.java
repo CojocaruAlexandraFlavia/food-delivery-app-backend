@@ -1,13 +1,12 @@
 package com.example.fooddelivery.service;
 
+import com.example.fooddelivery.enums.Role;
 import com.example.fooddelivery.model.*;
 import com.example.fooddelivery.model.dto.LocationDto;
 import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.model.dto.ReviewDto;
-import com.example.fooddelivery.repository.LocationRepository;
-import com.example.fooddelivery.repository.ProductRepository;
-import com.example.fooddelivery.repository.RestaurantRepository;
-import com.example.fooddelivery.repository.ReviewRepository;
+import com.example.fooddelivery.model.dto.user.BaseUserDto;
+import com.example.fooddelivery.repository.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,18 +25,19 @@ public class RestaurantService {
     private final LocationRepository locationRepository;
     private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
+    private final BaseUserRepository baseUserRepository;
 
-    //private final RestaurantManagerService restaurantManagerService;
     private final BaseUserService baseUserService;
 
     @Autowired
     public RestaurantService(RestaurantRepository restaurantRepository, LocationRepository locationRepository,
                              ProductRepository productRepository, ReviewRepository reviewRepository,
-                             BaseUserService baseUserService) {
+                             BaseUserRepository baseUserRepository, BaseUserService baseUserService) {
         this.restaurantRepository = restaurantRepository;
         this.locationRepository = locationRepository;
         this.productRepository = productRepository;
         this.reviewRepository = reviewRepository;
+        this.baseUserRepository = baseUserRepository;
         this.baseUserService = baseUserService;
     }
 
@@ -151,4 +151,34 @@ public class RestaurantService {
         }
         return null;
     }
+
+    public RestaurantManager addManagerUser(@NotNull BaseUserDto dto) {
+        Optional<BaseUser> optionalBaseUser = baseUserRepository.findByEmail(dto.getEmail());
+        if(optionalBaseUser.isEmpty()) {
+            RestaurantManager user = new RestaurantManager();
+            user.setEmail(dto.getEmail());
+            user.setPassword(dto.getPassword());
+            user.setFirstName(dto.getFirstName());
+            user.setLastName(dto.getLastName());
+            user.setRole(Role.ROLE_RESTAURANT_MANAGER);
+            user = baseUserRepository.save(user);
+            return user;
+        }
+        return null;
+    }
+    public DeliveryUser addDeliveryUser(@NotNull BaseUserDto dto) {
+        Optional<BaseUser> optionalBaseUser = baseUserRepository.findByEmail(dto.getEmail());
+        if(optionalBaseUser.isEmpty()) {
+            DeliveryUser user = new DeliveryUser();
+            user.setEmail(dto.getEmail());
+            user.setPassword(dto.getPassword());
+            user.setFirstName(dto.getFirstName());
+            user.setLastName(dto.getLastName());
+            user.setRole(Role.ROLE_DELIVERY_USER);
+            user = baseUserRepository.save(user);
+            return user;
+        }
+        return null;
+    }
+
 }
