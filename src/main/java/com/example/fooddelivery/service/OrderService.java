@@ -9,6 +9,7 @@ import com.example.fooddelivery.model.dto.ProductDto;
 import com.example.fooddelivery.repository.NotificationRepository;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.OrderRepository;
+import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -105,18 +106,29 @@ public class OrderService {
         Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
         if(optionalNotification.isPresent()){
             Notification notification = optionalNotification.get();
-            notification.setNotificationType(notification.getNotificationType());
+            notification.setSeen(true);
             notification = notificationRepository.save(notification);
             return NotificationDto.entityToDto(notification);
         }
         return null;
     }
 
-    public OrderDto updateOrder(Long orderId, String newStatus){
+    public OrderDto updateOrderStatus(Long orderId, String newStatus){
         Optional<Order> optionalOrder = findOrderById(orderId);
-        if(optionalOrder.isPresent()){
+        if(optionalOrder.isPresent() && EnumUtils.isValidEnum(OrderStatus.class, newStatus)){
             Order order = optionalOrder.get();
-            order.setStatus(OrderStatus.valueOf(newStatus));
+            OrderStatus orderStatus = OrderStatus.valueOf(newStatus);
+            order.setStatus(orderStatus);
+
+            //send notification if order is picked up
+            if (orderStatus.equals(OrderStatus.PICKED_UP)) {
+                Notification notification = new Notification();
+                notification.setSeen(false);
+                notification.setOrder(order);
+                notification.setNotificationType(NotificationType.ORDER_PICKED_UP);
+                notificationRepository.save(notification);
+            }
+
             return OrderDto.entityToDto(orderRepository.save(order));
         }
         return null;

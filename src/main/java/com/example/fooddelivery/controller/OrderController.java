@@ -1,6 +1,7 @@
 package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Order;
+import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
 import com.example.fooddelivery.service.OrderService;
@@ -51,7 +52,7 @@ public class OrderController {
     @PatchMapping("/change-status/{orderId}/{status}")
     public ResponseEntity<OrderDto> changeOrderStatus(@PathVariable("orderId") Long id,
                                                       @PathVariable("status") String newStatus){
-        OrderDto result = orderService.updateOrder(id, newStatus);
+        OrderDto result = orderService.updateOrderStatus(id, newStatus);
         if(result == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -67,6 +68,15 @@ public class OrderController {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
 
+    }
+
+    @PatchMapping("/see-notification/{id}")
+    public ResponseEntity<NotificationDto> seeNotification(@PathVariable("id") Long id) {
+        NotificationDto result = orderService.seeNotification(id);
+        if(result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 }
