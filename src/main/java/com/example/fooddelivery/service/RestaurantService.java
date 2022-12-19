@@ -6,6 +6,8 @@ import com.example.fooddelivery.model.dto.LocationDto;
 import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.model.dto.ReviewDto;
 import com.example.fooddelivery.model.dto.user.BaseUserDto;
+import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
+import com.example.fooddelivery.model.dto.user.RestaurantManagerDto;
 import com.example.fooddelivery.repository.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,7 +154,7 @@ public class RestaurantService {
         return null;
     }
 
-    public RestaurantManager addManagerUser(@NotNull BaseUserDto dto) {
+    public RestaurantManagerDto addManagerUser(@NotNull BaseUserDto dto) {
         Optional<BaseUser> optionalBaseUser = baseUserRepository.findByEmail(dto.getEmail());
         if(optionalBaseUser.isEmpty()) {
             RestaurantManager user = new RestaurantManager();
@@ -162,11 +164,12 @@ public class RestaurantService {
             user.setLastName(dto.getLastName());
             user.setRole(Role.ROLE_RESTAURANT_MANAGER);
             user = baseUserRepository.save(user);
-            return user;
+            return RestaurantManagerDto.entityToDto(user);
         }
         return null;
     }
-    public DeliveryUser addDeliveryUser(@NotNull BaseUserDto dto) {
+
+    public DeliveryUserDto addDeliveryUser(@NotNull BaseUserDto dto) {
         Optional<BaseUser> optionalBaseUser = baseUserRepository.findByEmail(dto.getEmail());
         if(optionalBaseUser.isEmpty()) {
             DeliveryUser user = new DeliveryUser();
@@ -176,7 +179,7 @@ public class RestaurantService {
             user.setLastName(dto.getLastName());
             user.setRole(Role.ROLE_DELIVERY_USER);
             user = baseUserRepository.save(user);
-            return user;
+            return DeliveryUserDto.entityToDto(user);
         }
         return null;
     }

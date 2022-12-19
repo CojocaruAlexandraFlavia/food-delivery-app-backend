@@ -90,7 +90,7 @@ public class RestaurantController {
 
     @PostMapping("/add-manager")
     public ResponseEntity<RestaurantManagerDto> addManagerUser(@RequestBody RestaurantManagerDto user) {
-        RestaurantManagerDto result = RestaurantManagerDto.entityToDto(restaurantService.addManagerUser(user));
+        RestaurantManagerDto result = restaurantService.addManagerUser(user);
         if (result == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -99,7 +99,7 @@ public class RestaurantController {
 
     @PostMapping("/add-deliver")
     public ResponseEntity<DeliveryUserDto> addDeliveryUser(@RequestBody DeliveryUserDto user) {
-        DeliveryUserDto result = DeliveryUserDto.entityToDto(restaurantService.addDeliveryUser(user));
+        DeliveryUserDto result = restaurantService.addDeliveryUser(user);
         if (result == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
