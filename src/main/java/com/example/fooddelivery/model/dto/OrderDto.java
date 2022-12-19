@@ -1,11 +1,11 @@
 package com.example.fooddelivery.model.dto;
 
 import com.example.fooddelivery.model.Order;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,10 +13,13 @@ import static java.util.stream.Collectors.toList;
 
 @Getter
 @Setter
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderDto {
 
     private String status;
-    private BigInteger number;
+    private Long number;
+    private Double deliveryTax;
+    private Double value;
 
     private List<NotificationDto> notifications;
     private List<OrderProductDto> products;
@@ -28,6 +31,7 @@ public class OrderDto {
         OrderDto dto = new OrderDto();
         dto.setStatus(order.getStatus().toString());
         dto.setNumber(order.getNumber());
+        dto.setValue(order.getValue());
 
         if(order.getProducts() != null) {
             dto.setProducts(order.getProducts()

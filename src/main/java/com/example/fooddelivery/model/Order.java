@@ -19,7 +19,8 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private BigInteger number;
+    private Long number;
+    private Double value;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

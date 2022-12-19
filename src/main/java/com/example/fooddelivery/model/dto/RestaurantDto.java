@@ -17,6 +17,7 @@ public class RestaurantDto {
     private String name;
     private String phoneNumber;
     private Double rating;
+    private Double deliveryTax;
     private Long restaurantManagerId;
     private List<LocationDto> locations;
     private List<ReviewDto> reviews;
@@ -26,7 +27,7 @@ public class RestaurantDto {
         dto.setName(restaurant.getName());
         dto.setPhoneNumber(restaurant.getPhoneNumber());
         dto.setRating(restaurant.getRating());
-
+        dto.setDeliveryTax(restaurant.getDeliveryTax());
         dto.setRestaurantManagerId(restaurant.getRestaurantManager().getId());
 
         if(restaurant.getLocations() != null){

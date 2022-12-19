@@ -5,6 +5,7 @@ import com.example.fooddelivery.enums.OrderStatus;
 import com.example.fooddelivery.model.*;
 import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.model.dto.ProductDto;
 import com.example.fooddelivery.repository.NotificationRepository;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.OrderRepository;
@@ -13,10 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class OrderService {
@@ -59,9 +60,9 @@ public class OrderService {
             //set order number
             Order lastSavedOrder = orderRepository.findFirstByOrderByIdDesc();
             if(lastSavedOrder != null) {
-                order.setNumber(lastSavedOrder.getNumber().add(BigInteger.ONE));
+                order.setNumber(lastSavedOrder.getNumber() + 1L);
             } else {
-                order.setNumber(BigInteger.ONE);
+                order.setNumber(1L);
             }
 
             //save order
@@ -72,16 +73,22 @@ public class OrderService {
 
             //save order products
             List<OrderProduct> orderProducts = new ArrayList<>();
+            AtomicReference<Double> value = new AtomicReference<>(0.0);
             orderDto.getProducts().forEach(orderProductDto -> {
-                Optional<Product> optionalProduct = productService.findProductById(orderProductDto.getProductDto().getId());
+                ProductDto productDto = orderProductDto.getProductDto();
+                Optional<Product> optionalProduct = productService.findProductById(productDto.getId());
                 OrderProduct orderProduct = new OrderProduct();
                 orderProduct.setQuantity(orderProductDto.getQuantity());
                 orderProduct.setOrder(savedOrder);
                 orderProduct.setProduct(optionalProduct.orElseThrow(EntityNotFoundException::new));
                 orderProducts.add(orderProduct);
+                double productPriceWithDiscountApplied = optionalProduct.get().getPrice() -
+                        optionalProduct.get().getDiscount() / 100 * optionalProduct.get().getPrice();
+                value.updateAndGet(v -> v + productPriceWithDiscountApplied * orderProductDto.getQuantity());
             });
             List<OrderProduct> savedOrderProducts = orderProductRepository.saveAll(orderProducts);
             savedOrder.setProducts(savedOrderProducts);
+            savedOrder.setValue(value.get() + orderDto.getDeliveryTax());
 
             //send notification
             Notification notification = new Notification();
