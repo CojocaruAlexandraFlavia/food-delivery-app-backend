@@ -4,6 +4,8 @@ import com.example.fooddelivery.enums.Role;
 import com.example.fooddelivery.model.BaseUser;
 import com.example.fooddelivery.model.ClientUser;
 import com.example.fooddelivery.model.Product;
+import com.example.fooddelivery.model.Restaurant;
+import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.model.dto.requests.AddProductToFavoritesRequest;
 import com.example.fooddelivery.model.dto.user.BaseUserDto;
 import com.example.fooddelivery.model.dto.user.ClientUserDto;
@@ -14,7 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ClientUserService {
@@ -67,5 +72,12 @@ public class ClientUserService {
         }
         return null;
     }
+
+
+    public List<ClientUserDto> getAllClientUsers() {
+        List<ClientUser> allClientUsers = clientUserRepository.findAll();
+        return allClientUsers.stream().map(ClientUserDto::entityToDto).collect(toList());
+    }
+
 
 }

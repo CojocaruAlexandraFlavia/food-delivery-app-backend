@@ -1,15 +1,20 @@
 package com.example.fooddelivery.controller;
 
+import com.example.fooddelivery.enums.NotificationType;
+import com.example.fooddelivery.model.Notification;
 import com.example.fooddelivery.model.Order;
+import com.example.fooddelivery.model.dto.CheckOrderCountDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.repository.NotificationRepository;
 import com.example.fooddelivery.service.OrderService;
+import org.hibernate.annotations.Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -18,10 +23,12 @@ import java.util.Optional;
 public class OrderController {
 
     private final OrderService orderService;
+    private final NotificationRepository notificationRepository;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, NotificationRepository notificationRepository) {
         this.orderService = orderService;
+        this.notificationRepository = notificationRepository;
     }
 
     @PostMapping("/save")
@@ -52,6 +59,14 @@ public class OrderController {
     public ResponseEntity<OrderDto> changeOrderStatus(@PathVariable("orderId") Long id,
                                                       @PathVariable("status") String newStatus){
         OrderDto result = orderService.updateOrder(id, newStatus);
+        Notification notification = new Notification();
+        Optional<Order> o = orderService.findOrderById(id);
+        if(o.isPresent()){
+            notification.setOrder(o.get());
+            notification.setNotificationType(NotificationType.valueOf(newStatus));
+            notificationRepository.save(notification);
+        }
+
         if(result == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -66,6 +81,16 @@ public class OrderController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
+
+    }
+    @GetMapping("/check-total-count")
+    public ResponseEntity<CheckOrderCountDto> checkTotalCount(){
+        Long orders = (long) orderService.getAll().size();
+        double price = orderService.getTotalCounts();
+        CheckOrderCountDto checkOrderCountDto =  new CheckOrderCountDto();
+        checkOrderCountDto.setTotalCount(price);
+        checkOrderCountDto.setNumberOfOrders(orders);
+        return new ResponseEntity<>(checkOrderCountDto, HttpStatus.OK);
 
     }
 
