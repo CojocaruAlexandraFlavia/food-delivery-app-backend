@@ -1,6 +1,7 @@
 package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Order;
+import com.example.fooddelivery.model.dto.CheckOrderCountDto;
 import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
@@ -78,6 +79,7 @@ public class OrderController {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
     @GetMapping("/check-total-count")
     public ResponseEntity<CheckOrderCountDto> checkTotalCount(){
         Long orders = (long) orderService.getAll().size();

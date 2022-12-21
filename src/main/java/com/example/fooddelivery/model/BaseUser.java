@@ -35,10 +35,6 @@ public class BaseUser implements UserDetails {
         return singletonList(new SimpleGrantedAuthority(role.toString()));
     }
 
-    public Long getId() {
-        return id;
-    }
-
     @Override
     public String getUsername() {
         return email;

@@ -94,7 +94,7 @@ public class OrderService {
             //send notification
             Notification notification = new Notification();
             notification.setOrder(savedOrder);
-            notification.setNotificationType(NotificationType.ORDER_RECEIVED);
+            notification.setType(NotificationType.ORDER_RECEIVED);
             notification.setSeen(false);
             notificationRepository.save(notification);
             return OrderDto.entityToDto(orderRepository.save(savedOrder));
@@ -125,7 +125,7 @@ public class OrderService {
                 Notification notification = new Notification();
                 notification.setSeen(false);
                 notification.setOrder(order);
-                notification.setNotificationType(NotificationType.ORDER_PICKED_UP);
+                notification.setType(NotificationType.ORDER_PICKED_UP);
                 notificationRepository.save(notification);
             }
 

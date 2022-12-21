@@ -1,6 +1,7 @@
 package com.example.fooddelivery.service;
 
 import com.example.fooddelivery.model.*;
+import com.example.fooddelivery.model.dto.UsernameAndPasswordAuthRequest;
 import com.example.fooddelivery.model.dto.user.*;
 import com.example.fooddelivery.repository.BaseUserRepository;
 import com.example.fooddelivery.util.JwtUtils;

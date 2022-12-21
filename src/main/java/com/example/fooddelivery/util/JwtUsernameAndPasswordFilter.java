@@ -1,6 +1,6 @@
 package com.example.fooddelivery.util;
 
-import com.example.fooddelivery.model.UsernameAndPasswordAuthRequest;
+import com.example.fooddelivery.model.dto.UsernameAndPasswordAuthRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import org.jetbrains.annotations.NotNull;

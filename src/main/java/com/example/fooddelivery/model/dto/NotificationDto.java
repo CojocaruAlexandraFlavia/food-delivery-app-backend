@@ -16,7 +16,7 @@ public class NotificationDto {
     public static @NotNull NotificationDto entityToDto(@NotNull Notification notification) {
         NotificationDto dto = new NotificationDto();
         dto.setSeen(notification.getSeen());
-        dto.setNotificationType(notification.getNotificationType().toString());
+        dto.setNotificationType(notification.getType().toString());
         dto.setOrderId(notification.getOrder().getId());
         return dto;
     }
