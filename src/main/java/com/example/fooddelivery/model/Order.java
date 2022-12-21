@@ -36,12 +36,4 @@ public class Order {
     @ManyToOne
     private DeliveryUser deliveryUser;
 
-    public double getTotalPrice(){
-        double price = 0.0;
-        for (OrderProduct p:products) {
-            price += (p.getProduct().getPrice() - ((p.getProduct().getDiscount()/100))* p.getProduct().getPrice()) * (p.getQuantity());
-        }
-        return price;
-    }
-
 }

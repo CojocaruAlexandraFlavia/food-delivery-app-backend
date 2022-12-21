@@ -3,6 +3,7 @@ package com.example.fooddelivery.service;
 import com.example.fooddelivery.enums.NotificationType;
 import com.example.fooddelivery.enums.OrderStatus;
 import com.example.fooddelivery.model.*;
+import com.example.fooddelivery.model.dto.CheckOrderCountDto;
 import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.OrderDto;
 import com.example.fooddelivery.model.dto.ProductDto;
@@ -162,14 +163,18 @@ public class OrderService {
     public List<Order> getAll(){
         return orderRepository.findAll();
     }
-    public double getTotalCounts(){
-        List<Order> allOrder = orderRepository.findAll();
-        double totalCount = 0.0;
-        for (Order o: allOrder) {
-            totalCount += o.getTotalPrice();
-        }
-        return totalCount;
 
+    public double getTotalCounts(){
+        List<Order> orders = orderRepository.findAll();
+        return orders.stream().mapToDouble(Order::getValue).sum();
     }
 
+    public CheckOrderCountDto checkTotalCount() {
+        Long orders = (long) getAll().size();
+        double price = getTotalCounts();
+        CheckOrderCountDto checkOrderCountDto =  new CheckOrderCountDto();
+        checkOrderCountDto.setTotalCount(price);
+        checkOrderCountDto.setNumberOfOrders(orders);
+        return checkOrderCountDto;
+    }
 }
