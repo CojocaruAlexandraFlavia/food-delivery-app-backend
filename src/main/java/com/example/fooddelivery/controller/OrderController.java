@@ -78,5 +78,15 @@ public class OrderController {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+    @GetMapping("/check-total-count")
+    public ResponseEntity<CheckOrderCountDto> checkTotalCount(){
+        Long orders = (long) orderService.getAll().size();
+        double price = orderService.getTotalCounts();
+        CheckOrderCountDto checkOrderCountDto =  new CheckOrderCountDto();
+        checkOrderCountDto.setTotalCount(price);
+        checkOrderCountDto.setNumberOfOrders(orders);
+        return new ResponseEntity<>(checkOrderCountDto, HttpStatus.OK);
+
+    }
 
 }

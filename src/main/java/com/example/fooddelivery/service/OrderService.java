@@ -159,4 +159,17 @@ public class OrderService {
         return null;
     }
 
+    public List<Order> getAll(){
+        return orderRepository.findAll();
+    }
+    public double getTotalCounts(){
+        List<Order> allOrder = orderRepository.findAll();
+        double totalCount = 0.0;
+        for (Order o: allOrder) {
+            totalCount += o.getTotalPrice();
+        }
+        return totalCount;
+
+    }
+
 }
