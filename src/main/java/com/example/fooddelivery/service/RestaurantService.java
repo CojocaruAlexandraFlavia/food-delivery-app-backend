@@ -83,7 +83,6 @@ public class RestaurantService {
             Restaurant restaurant = optionalRestaurant.get();
             restaurant.setName(restaurantDto.getName());
             restaurant.setPhoneNumber(restaurantDto.getPhoneNumber());
-            restaurant.setRating(restaurantDto.getRating());
             return entityToDto(restaurantRepository.save(restaurant));
         }
         return null;
@@ -110,6 +109,7 @@ public class RestaurantService {
             location.setAddress(locationDto.getAddress());
             location.setCity(locationDto.getCity());
             location.setRestaurant(restaurant);
+            location.setAvailability(true);
             locationRepository.save(location);
             return entityToDto(restaurantRepository.save(restaurant));
         }
