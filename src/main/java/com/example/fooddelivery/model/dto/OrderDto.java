@@ -20,6 +20,7 @@ public class OrderDto {
     private Long number;
     private Double deliveryTax;
     private Double value;
+    private String paymentType;
 
     private List<NotificationDto> notifications;
     private List<OrderProductDto> products;
@@ -32,6 +33,8 @@ public class OrderDto {
         dto.setStatus(order.getStatus().toString());
         dto.setNumber(order.getNumber());
         dto.setValue(order.getValue());
+        dto.setPaymentType(order.getPaymentType().toString());
+        dto.setDeliveryTax(order.getDeliveryTax());
 
         if(order.getProducts() != null) {
             dto.setProducts(order.getProducts()

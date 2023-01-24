@@ -2,6 +2,7 @@ package com.example.fooddelivery.service;
 
 import com.example.fooddelivery.enums.NotificationType;
 import com.example.fooddelivery.enums.OrderStatus;
+import com.example.fooddelivery.enums.PaymentType;
 import com.example.fooddelivery.model.*;
 import com.example.fooddelivery.model.dto.CheckOrderCountDto;
 import com.example.fooddelivery.model.dto.NotificationDto;
@@ -71,6 +72,8 @@ public class OrderService {
             order.setStatus(OrderStatus.RECEIVED);
             order.setClientUser(optionalClientUser.get());
             order.setDeliveryUser(optionalDeliveryUser.get());
+            order.setPaymentType(PaymentType.valueOf(orderDto.getPaymentType()));
+            order.setDeliveryTax(order.getDeliveryTax());
             Order savedOrder = orderRepository.save(order);
 
             //save order products
@@ -90,7 +93,7 @@ public class OrderService {
             });
             List<OrderProduct> savedOrderProducts = orderProductRepository.saveAll(orderProducts);
             savedOrder.setProducts(savedOrderProducts);
-            savedOrder.setValue(value.get() + orderDto.getDeliveryTax());
+            savedOrder.setValue(value.get());
 
             //send notification
             Notification notification = new Notification();

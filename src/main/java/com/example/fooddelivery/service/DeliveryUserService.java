@@ -4,6 +4,7 @@ import com.example.fooddelivery.enums.Role;
 import com.example.fooddelivery.model.BaseUser;
 import com.example.fooddelivery.model.DeliveryUser;
 import com.example.fooddelivery.model.dto.user.BaseUserDto;
+import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
 import com.example.fooddelivery.repository.BaseUserRepository;
 import com.example.fooddelivery.repository.DeliveryUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,4 +47,8 @@ public class DeliveryUserService {
         return deliveryUserRepository.findById(id);
     }
 
+    public DeliveryUserDto findByIdDto(Long id) {
+        Optional<DeliveryUser> optionalDeliveryUser = findDeliveryUserById(id);
+        return optionalDeliveryUser.map(DeliveryUserDto::entityToDto).orElse(null);
+    }
 }
