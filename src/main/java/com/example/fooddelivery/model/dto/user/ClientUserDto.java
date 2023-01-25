@@ -26,6 +26,7 @@ public class ClientUserDto extends BaseUserDto{
 
     public static @NotNull ClientUserDto entityToDto(@NotNull ClientUser clientUser) {
         ClientUserDto clientUserDto = new ClientUserDto();
+        clientUserDto.setId(clientUserDto.getId());
         clientUserDto.setEmail(clientUser.getEmail());
         clientUserDto.setLastName(clientUser.getLastName());
         clientUserDto.setFirstName(clientUser.getFirstName());

@@ -4,19 +4,19 @@ import com.example.fooddelivery.enums.NotificationType;
 import com.example.fooddelivery.enums.OrderStatus;
 import com.example.fooddelivery.enums.PaymentType;
 import com.example.fooddelivery.model.*;
-import com.example.fooddelivery.model.dto.CheckOrderCountDto;
-import com.example.fooddelivery.model.dto.NotificationDto;
-import com.example.fooddelivery.model.dto.OrderDto;
-import com.example.fooddelivery.model.dto.ProductDto;
+import com.example.fooddelivery.model.dto.*;
 import com.example.fooddelivery.repository.NotificationRepository;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.OrderRepository;
+import com.example.fooddelivery.repository.UserAddressRepository;
 import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -33,16 +33,20 @@ public class OrderService {
 
     private final ClientUserService clientUserService;
     private final DeliveryUserService deliveryUserService;
+    private final UserAddressRepository addressRepository;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, NotificationRepository notificationRepository,
-                        OrderProductRepository productRepository, ProductService productService, ClientUserService clientUserService, DeliveryUserService deliveryUserService) {
+                        OrderProductRepository productRepository, ProductService productService,
+                        ClientUserService clientUserService, DeliveryUserService deliveryUserService,
+                        UserAddressRepository addressRepository) {
         this.orderRepository = orderRepository;
         this.notificationRepository = notificationRepository;
         this.orderProductRepository = productRepository;
         this.productService = productService;
         this.clientUserService = clientUserService;
         this.deliveryUserService = deliveryUserService;
+        this.addressRepository = addressRepository;
     }
 
     public Optional<Order> findOrderById(Long id) {
@@ -60,6 +64,21 @@ public class OrderService {
 
         if(optionalClientUser.isPresent() && optionalDeliveryUser.isPresent()){
 
+            //set delivery address
+            UserAddressDto deliveryAddressDto = orderDto.getDeliveryAddress();
+            if(deliveryAddressDto.getId() != null) {
+                Optional<UserAddress> optionalUserAddress = addressRepository.findById(deliveryAddressDto.getId());
+                optionalUserAddress.ifPresent(order::setDeliveryAddress);
+            } else {
+                UserAddress userAddress = new UserAddress();
+                userAddress.setAddress(deliveryAddressDto.getAddress());
+                userAddress.setCity(deliveryAddressDto.getCity());
+                userAddress.setZipCode(deliveryAddressDto.getZipCode());
+                userAddress.setClientUser(optionalClientUser.get());
+                userAddress = addressRepository.save(userAddress);
+                order.setDeliveryAddress(userAddress);
+            }
+
             //set order number
             Order lastSavedOrder = orderRepository.findFirstByOrderByIdDesc();
             if(lastSavedOrder != null) {
@@ -69,11 +88,13 @@ public class OrderService {
             }
 
             //save order
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+            order.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
             order.setStatus(OrderStatus.RECEIVED);
             order.setClientUser(optionalClientUser.get());
             order.setDeliveryUser(optionalDeliveryUser.get());
             order.setPaymentType(PaymentType.valueOf(orderDto.getPaymentType()));
-            order.setDeliveryTax(order.getDeliveryTax());
+            order.setDeliveryTax(orderDto.getDeliveryTax());
             Order savedOrder = orderRepository.save(order);
 
             //save order products

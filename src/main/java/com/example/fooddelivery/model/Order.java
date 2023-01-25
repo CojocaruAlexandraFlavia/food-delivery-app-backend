@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -22,6 +23,7 @@ public class Order {
     private Long number;
     private Double value;
     private Double deliveryTax;
+    private LocalDateTime dateTime;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
@@ -40,5 +42,8 @@ public class Order {
 
     @ManyToOne
     private DeliveryUser deliveryUser;
+
+    @ManyToOne
+    private UserAddress deliveryAddress;
 
 }

@@ -20,6 +20,7 @@ public class DeliveryUserDto extends BaseUserDto{
 
     public static @NotNull DeliveryUserDto entityToDto(@NotNull DeliveryUser deliveryUser) {
         DeliveryUserDto dto = new DeliveryUserDto();
+        dto.setId(deliveryUser.getId());
         dto.setEmail(deliveryUser.getEmail());
         dto.setLastName(deliveryUser.getLastName());
         dto.setFirstName(deliveryUser.getFirstName());

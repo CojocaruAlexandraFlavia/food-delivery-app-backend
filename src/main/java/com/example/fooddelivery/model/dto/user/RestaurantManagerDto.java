@@ -12,6 +12,7 @@ public class RestaurantManagerDto extends BaseUserDto{
 
     public static @NotNull RestaurantManagerDto entityToDto(@NotNull RestaurantManager restaurantManager) {
         RestaurantManagerDto dto = new RestaurantManagerDto();
+        dto.setId(restaurantManager.getId());
         dto.setEmail(restaurantManager.getEmail());
         dto.setRole(Role.ROLE_RESTAURANT_MANAGER.toString());
         dto.setLastName(restaurantManager.getLastName());
