@@ -179,7 +179,7 @@ public class RestaurantService {
         if(optionalBaseUser.isEmpty()) {
             DeliveryUser user = new DeliveryUser();
             user.setEmail(dto.getEmail());
-            user.setPassword(dto.getPassword());
+            user.setPassword(passwordEncoder.encode(dto.getFirstName()) + dto.getLastName());
             user.setFirstName(dto.getFirstName());
             user.setLastName(dto.getLastName());
             user.setRole(Role.ROLE_DELIVERY_USER);

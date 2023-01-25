@@ -2,10 +2,8 @@ package com.example.fooddelivery.model.dto.user;
 
 import com.example.fooddelivery.enums.Role;
 import com.example.fooddelivery.model.ClientUser;
-import com.example.fooddelivery.model.dto.OrderDto;
-import com.example.fooddelivery.model.dto.ProductDto;
-import com.example.fooddelivery.model.dto.ReviewDto;
-import com.example.fooddelivery.model.dto.UserAddressDto;
+import com.example.fooddelivery.model.Notification;
+import com.example.fooddelivery.model.dto.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +21,7 @@ public class ClientUserDto extends BaseUserDto{
     private List<ReviewDto> reviews;
     private List<OrderDto> orders;
     private List<ProductDto> favoriteProducts;
+    private List<NotificationDto> notifications = new ArrayList<>();
 
     public static @NotNull ClientUserDto entityToDto(@NotNull ClientUser clientUser) {
         ClientUserDto clientUserDto = new ClientUserDto();
@@ -31,7 +30,8 @@ public class ClientUserDto extends BaseUserDto{
         clientUserDto.setLastName(clientUser.getLastName());
         clientUserDto.setFirstName(clientUser.getFirstName());
         clientUserDto.setRole(Role.ROLE_CLIENT_USER.toString());
-        clientUserDto.setPassword(clientUser.getPassword());
+        //clientUserDto.setPassword(clientUser.getPassword());
+        clientUserDto.setPhoneNumber(clientUserDto.getPhoneNumber());
 
         if(clientUser.getAddresses() != null) {
             clientUserDto.setAddresses(clientUser.getAddresses()
@@ -48,6 +48,11 @@ public class ClientUserDto extends BaseUserDto{
         if(clientUser.getOrders() != null) {
             clientUserDto.setOrders(clientUser.getOrders()
                     .stream().map(OrderDto::entityToDto).collect(toList()));
+            clientUser.getOrders().forEach(order -> {
+                List<NotificationDto> notificationDtoList = order.getNotifications().stream()
+                        .map(NotificationDto::entityToDto).collect(toList());
+                clientUserDto.addNotifications(notificationDtoList);
+            });
         } else {
             clientUserDto.setOrders(new ArrayList<>());
         }
@@ -58,6 +63,10 @@ public class ClientUserDto extends BaseUserDto{
             clientUserDto.setFavoriteProducts(new ArrayList<>());
         }
         return clientUserDto;
+    }
+
+    private void addNotifications(List<NotificationDto> notificationDtos) {
+        notifications.addAll(notificationDtos);
     }
 
 }

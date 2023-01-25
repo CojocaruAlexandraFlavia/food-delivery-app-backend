@@ -17,7 +17,8 @@ public class AdminUserDto extends BaseUserDto{
         dto.setFirstName(admin.getFirstName());
         dto.setLastName(admin.getLastName());
         dto.setRole(Role.ROLE_ADMIN.toString());
-        dto.setPassword(admin.getPassword());
+        //dto.setPassword(admin.getPassword());
+        dto.setPhoneNumber(admin.getPhoneNumber());
         return dto;
     }
 

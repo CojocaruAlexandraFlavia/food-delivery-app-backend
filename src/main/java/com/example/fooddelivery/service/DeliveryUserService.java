@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DeliveryUserService {
@@ -50,5 +52,29 @@ public class DeliveryUserService {
     public DeliveryUserDto findByIdDto(Long id) {
         Optional<DeliveryUser> optionalDeliveryUser = findDeliveryUserById(id);
         return optionalDeliveryUser.map(DeliveryUserDto::entityToDto).orElse(null);
+    }
+
+    public List<DeliveryUserDto> getAllDeliveryUsersDto() {
+        List<DeliveryUser> deliveryUsers = deliveryUserRepository.findAll();
+        return deliveryUsers.stream().map(DeliveryUserDto::entityToDto).collect(Collectors.toList());
+    }
+
+    public void deleteById(Long id) {
+        Optional<DeliveryUser> optionalDeliveryUser = findDeliveryUserById(id);
+        optionalDeliveryUser.ifPresent(deliveryUserRepository::delete);
+    }
+
+    public DeliveryUserDto updateDeliveryUser(Long id, DeliveryUserDto dto) {
+        Optional<DeliveryUser> optionalDeliveryUser = findDeliveryUserById(id);
+        if(optionalDeliveryUser.isPresent()) {
+            DeliveryUser deliveryUser = optionalDeliveryUser.get();
+            deliveryUser.setEmail(dto.getEmail());
+            deliveryUser.setFirstName(dto.getFirstName());
+            deliveryUser.setLastName(dto.getLastName());
+            deliveryUser.setPhoneNumber(dto.getPhoneNumber());
+            deliveryUser = deliveryUserRepository.save(deliveryUser);
+            return DeliveryUserDto.entityToDto(deliveryUser);
+        }
+        return null;
     }
 }

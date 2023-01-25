@@ -9,14 +9,16 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class NotificationDto {
 
+    private Long id;
     private boolean seen;
-    private String notificationType;
+    private String type;
     private Long orderId;
 
     public static @NotNull NotificationDto entityToDto(@NotNull Notification notification) {
         NotificationDto dto = new NotificationDto();
+        dto.setId(notification.getId());
         dto.setSeen(notification.getSeen());
-        dto.setNotificationType(notification.getType().toString());
+        dto.setType(notification.getType().toString());
         dto.setOrderId(notification.getOrder().getId());
         return dto;
     }

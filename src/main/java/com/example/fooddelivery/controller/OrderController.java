@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -93,6 +94,27 @@ public class OrderController {
     @GetMapping("/delivery-user/{id}")
     public ResponseEntity<DeliveryUserDto> getDeliveryUser(@PathVariable("id") Long id) {
         DeliveryUserDto result = deliveryUserService.findByIdDto(id);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/all-delivery-users")
+    public ResponseEntity<List<DeliveryUserDto>> getALlDeliveryUsers() {
+        List<DeliveryUserDto> deliveryUserDtoList = deliveryUserService.getAllDeliveryUsersDto();
+        return new ResponseEntity<>(deliveryUserDtoList, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-delivery-user/{id}")
+    public ResponseEntity<?> deleteDeliveryUser(@PathVariable("id") Long id) {
+        deliveryUserService.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/update-delivery-user/{id}")
+    public ResponseEntity<DeliveryUserDto> updateDeliveryUser(@PathVariable("id") Long id, @RequestBody DeliveryUserDto dto) {
+        DeliveryUserDto result = deliveryUserService.updateDeliveryUser(id, dto);
+        if(result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
