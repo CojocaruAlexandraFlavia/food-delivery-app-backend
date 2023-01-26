@@ -101,7 +101,7 @@ public class ProductService {
     }
 
     @Transactional
-    public List<ProductDto> getAllProductsByRestarantId(Long restaurantId) {
+    public List<ProductDto> getAllProductsByRestaurantId(Long restaurantId) {
         Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
         return optionalRestaurant.map(restaurant -> restaurant.getProducts().stream()
                 .map(ProductDto::entityToDto).collect(toList())).orElseGet(ArrayList::new);

@@ -52,8 +52,8 @@ public class ProductController {
     }
 
     @GetMapping("/get-all-by-restaurantId/{restaurantId}")
-    public ResponseEntity<List<ProductDto>> getAllProductsByRestarantId(@PathVariable("restaurantId") Long restaurantId){
-        List<ProductDto> result = productService.getAllProductsByRestarantId(restaurantId);
+    public ResponseEntity<List<ProductDto>> getAllProductsByRestaurantId(@PathVariable("restaurantId") Long restaurantId){
+        List<ProductDto> result = productService.getAllProductsByRestaurantId(restaurantId);
         if(result.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
