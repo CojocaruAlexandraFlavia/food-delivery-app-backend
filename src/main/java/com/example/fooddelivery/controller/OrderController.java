@@ -5,6 +5,8 @@ import com.example.fooddelivery.model.dto.CheckOrderCountDto;
 import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
+import com.example.fooddelivery.service.DeliveryUserService;
 import com.example.fooddelivery.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -20,10 +23,12 @@ import java.util.Optional;
 public class OrderController {
 
     private final OrderService orderService;
+    private final DeliveryUserService deliveryUserService;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, DeliveryUserService deliveryUserService) {
         this.orderService = orderService;
+        this.deliveryUserService = deliveryUserService;
     }
 
     @PostMapping("/save")
@@ -83,6 +88,33 @@ public class OrderController {
     @GetMapping("/check-total-count")
     public ResponseEntity<CheckOrderCountDto> checkTotalCount(){
         CheckOrderCountDto result = orderService.checkTotalCount();
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/delivery-user/{id}")
+    public ResponseEntity<DeliveryUserDto> getDeliveryUser(@PathVariable("id") Long id) {
+        DeliveryUserDto result = deliveryUserService.findByIdDto(id);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/all-delivery-users")
+    public ResponseEntity<List<DeliveryUserDto>> getALlDeliveryUsers() {
+        List<DeliveryUserDto> deliveryUserDtoList = deliveryUserService.getAllDeliveryUsersDto();
+        return new ResponseEntity<>(deliveryUserDtoList, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-delivery-user/{id}")
+    public ResponseEntity<?> deleteDeliveryUser(@PathVariable("id") Long id) {
+        deliveryUserService.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PutMapping("/update-delivery-user/{id}")
+    public ResponseEntity<DeliveryUserDto> updateDeliveryUser(@PathVariable("id") Long id, @RequestBody DeliveryUserDto dto) {
+        DeliveryUserDto result = deliveryUserService.updateDeliveryUser(id, dto);
+        if(result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

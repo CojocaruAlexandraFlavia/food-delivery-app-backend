@@ -1,10 +1,9 @@
 package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Restaurant;
+import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.model.dto.ReviewDto;
 import com.example.fooddelivery.model.dto.requests.AddLocationRequest;
-import com.example.fooddelivery.model.dto.RestaurantDto;
-import com.example.fooddelivery.model.dto.user.ClientUserDto;
 import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
 import com.example.fooddelivery.model.dto.user.RestaurantManagerDto;
 import com.example.fooddelivery.service.RestaurantService;
@@ -30,14 +29,18 @@ public class RestaurantController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<RestaurantDto> saveRestaurant(@RequestBody RestaurantDto restaurantDto){
-        return ResponseEntity.of(Optional.of(restaurantService.saveRestaurant(restaurantDto)));
+    public ResponseEntity<RestaurantDto> saveRestaurant(@RequestBody RestaurantDto restaurantDto) {
+        RestaurantDto result = restaurantService.saveRestaurant(restaurantDto);
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/get-by-id/{id}")
-    public ResponseEntity<RestaurantDto> findRestaurantById(@PathVariable("id") Long id){
+    public ResponseEntity<RestaurantDto> findRestaurantById(@PathVariable("id") Long id) {
         Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(id);
-        if(optionalRestaurant.isPresent()){
+        if (optionalRestaurant.isPresent()) {
             RestaurantDto restaurantDto = RestaurantDto.entityToDto(optionalRestaurant.get());
             return new ResponseEntity<>(restaurantDto, HttpStatus.OK);
         }
@@ -45,9 +48,9 @@ public class RestaurantController {
     }
 
     @DeleteMapping("/delete-by-id/{id}")
-    public ResponseEntity<?> deleteRestaurantById(@PathVariable("id") Long id){
+    public ResponseEntity<?> deleteRestaurantById(@PathVariable("id") Long id) {
         boolean result = restaurantService.deleteRestaurant(id);
-        if(result){
+        if (result) {
             return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -55,19 +58,19 @@ public class RestaurantController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<RestaurantDto> updateRestaurant(@PathVariable("id") Long id,
-                                                          @RequestBody RestaurantDto dto){
+                                                          @RequestBody RestaurantDto dto) {
         RestaurantDto result = restaurantService.updateRestaurant(id, dto);
-        if(result == null){
+        if (result == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @PutMapping("/add-location")
-    public ResponseEntity<RestaurantDto> addLocation(@RequestBody AddLocationRequest addLocationRequest){
+    public ResponseEntity<RestaurantDto> addLocation(@RequestBody AddLocationRequest addLocationRequest) {
         RestaurantDto result = restaurantService.addLocation(addLocationRequest.getRestaurantId(),
                 addLocationRequest.getRestaurantManagerId(), addLocationRequest.getLocation());
-        if(result == null){
+        if (result == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -106,5 +109,9 @@ public class RestaurantController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-
+    @GetMapping("/managers")
+    public ResponseEntity<List<RestaurantManagerDto>> getAllRestaurantManagers() {
+        List<RestaurantManagerDto> result = restaurantService.getAllRestaurantManagers();
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

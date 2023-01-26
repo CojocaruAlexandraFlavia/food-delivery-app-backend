@@ -16,6 +16,7 @@ public class ReviewDto {
 
     private String clientFirstName;
     private String clientLastName;
+    private String restaurantName;
 
     public static @NotNull ReviewDto entityToDto(@NotNull Review review) {
         ReviewDto dto = new ReviewDto();
@@ -25,6 +26,7 @@ public class ReviewDto {
         dto.setRestaurantId(review.getRestaurant().getId());
         dto.setClientLastName(review.getClientUser().getLastName());
         dto.setClientFirstName(review.getClientUser().getFirstName());
+        dto.setRestaurantName(review.getRestaurant().getName());
         return dto;
     }
 }

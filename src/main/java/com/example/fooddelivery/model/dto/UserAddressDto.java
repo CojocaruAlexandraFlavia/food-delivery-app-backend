@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 @Setter
 public class UserAddressDto {
 
+    private Long id;
     private String city;
     private Integer zipCode;
     private String address;
@@ -18,6 +19,7 @@ public class UserAddressDto {
         dto.setAddress(address.getAddress());
         dto.setCity(address.getCity());
         dto.setZipCode(address.getZipCode());
+        dto.setId(address.getId());
         return dto;
     }
 

@@ -2,7 +2,7 @@ package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.*;
 import com.example.fooddelivery.model.dto.LoginResponse;
-import com.example.fooddelivery.model.dto.UsernameAndPasswordAuthRequest;
+import com.example.fooddelivery.model.dto.requests.UsernameAndPasswordAuthRequest;
 import com.example.fooddelivery.model.dto.user.*;
 import com.example.fooddelivery.service.BaseUserService;
 import com.example.fooddelivery.service.ClientUserService;
