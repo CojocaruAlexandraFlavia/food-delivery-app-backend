@@ -19,6 +19,7 @@ import java.util.Optional;
 
 @RestController
 @Transactional
+@CrossOrigin("*")
 @RequestMapping("/restaurant")
 public class RestaurantController {
 
