@@ -98,6 +98,12 @@ public class ProductService {
         return allProducts.stream().map(ProductDto::entityToDto).collect(toList());
     }
 
+    public List<ProductDto> getAllProductsByRestarantId(Long restaurantId) {
+        List<Product> allProducts = productRepository.findAll();
+        Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
+        return allProducts.stream().map(ProductDto::entityToDto).collect(toList());
+    }
+
     public ProductDto changeProductAvailability(Long productId){
         if(productId != null){
             Optional<Product> optionalProduct = findProductById(productId);

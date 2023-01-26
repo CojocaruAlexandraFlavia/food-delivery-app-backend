@@ -51,6 +51,11 @@ public class ProductController {
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 
+    @GetMapping("/get-all-by-restaurantId/{id}")
+    public ResponseEntity<List<ProductDto>> getAllProductsByRestarantId(@PathVariable("id") Long id){
+        return new ResponseEntity<>(productService.getAllProductsByRestarantId(id), HttpStatus.OK);
+    }
+
     @DeleteMapping("/delete-by-id/{id}")
     public ResponseEntity<?> deleteProductById(@PathVariable("id") Long id){
         boolean result = productService.deleteProduct(id);
