@@ -18,6 +18,7 @@ public class Restaurant {
     private String name;
     private String phoneNumber;
     private Double rating;
+    private Double deliveryTax;
 
     @ManyToOne
     private RestaurantManager restaurantManager;

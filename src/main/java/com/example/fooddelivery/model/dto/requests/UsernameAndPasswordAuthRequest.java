@@ -1,4 +1,4 @@
-package com.example.fooddelivery.model;
+package com.example.fooddelivery.model.dto.requests;
 
 import lombok.Getter;
 import lombok.Setter;

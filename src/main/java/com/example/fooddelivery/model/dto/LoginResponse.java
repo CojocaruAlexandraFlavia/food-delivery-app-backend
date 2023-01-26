@@ -1,4 +1,4 @@
-package com.example.fooddelivery.model;
+package com.example.fooddelivery.model.dto;
 
 import com.example.fooddelivery.model.dto.user.BaseUserDto;
 import lombok.Getter;

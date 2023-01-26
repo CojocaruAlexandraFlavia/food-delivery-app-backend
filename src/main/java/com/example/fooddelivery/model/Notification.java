@@ -17,7 +17,7 @@ public class Notification {
     private Boolean seen;
 
     @Enumerated(EnumType.STRING)
-    private NotificationType notificationType;
+    private NotificationType type;
 
     @ManyToOne
     private Order order;

@@ -11,6 +11,7 @@ import com.example.fooddelivery.model.dto.user.RestaurantManagerDto;
 import com.example.fooddelivery.repository.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,22 +26,25 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
     private final LocationRepository locationRepository;
-    private final ProductRepository productRepository;
     private final ReviewRepository reviewRepository;
     private final BaseUserRepository baseUserRepository;
 
     private final BaseUserService baseUserService;
+    private final PasswordEncoder passwordEncoder;
+
+    private final RestaurantManagerRepository restaurantManagerRepository;
 
     @Autowired
     public RestaurantService(RestaurantRepository restaurantRepository, LocationRepository locationRepository,
-                             ProductRepository productRepository, ReviewRepository reviewRepository,
-                             BaseUserRepository baseUserRepository, BaseUserService baseUserService) {
+                             ReviewRepository reviewRepository, BaseUserRepository baseUserRepository,
+                             BaseUserService baseUserService, PasswordEncoder passwordEncoder, RestaurantManagerRepository restaurantManagerRepository) {
         this.restaurantRepository = restaurantRepository;
         this.locationRepository = locationRepository;
-        this.productRepository = productRepository;
         this.reviewRepository = reviewRepository;
         this.baseUserRepository = baseUserRepository;
         this.baseUserService = baseUserService;
+        this.passwordEncoder = passwordEncoder;
+        this.restaurantManagerRepository = restaurantManagerRepository;
     }
 
     public Optional<Restaurant> findRestaurantById(Long id) {
@@ -58,6 +62,7 @@ public class RestaurantService {
             restaurant.setPhoneNumber(restaurantDto.getPhoneNumber());
             restaurant.setRating(0.0);
             restaurant.setRestaurantManager(restaurantManager);
+            restaurant.setDeliveryTax(restaurantDto.getDeliveryTax());
             Restaurant savedRestaurant = restaurantRepository.save(restaurant);
 
             //save restaurant locations
@@ -83,7 +88,6 @@ public class RestaurantService {
             Restaurant restaurant = optionalRestaurant.get();
             restaurant.setName(restaurantDto.getName());
             restaurant.setPhoneNumber(restaurantDto.getPhoneNumber());
-            restaurant.setRating(restaurantDto.getRating());
             return entityToDto(restaurantRepository.save(restaurant));
         }
         return null;
@@ -110,6 +114,7 @@ public class RestaurantService {
             location.setAddress(locationDto.getAddress());
             location.setCity(locationDto.getCity());
             location.setRestaurant(restaurant);
+            location.setAvailability(true);
             locationRepository.save(location);
             return entityToDto(restaurantRepository.save(restaurant));
         }
@@ -159,7 +164,7 @@ public class RestaurantService {
         if(optionalBaseUser.isEmpty()) {
             RestaurantManager user = new RestaurantManager();
             user.setEmail(dto.getEmail());
-            user.setPassword(dto.getPassword());
+            user.setPassword(passwordEncoder.encode(dto.getFirstName() + dto.getLastName()));
             user.setFirstName(dto.getFirstName());
             user.setLastName(dto.getLastName());
             user.setRole(Role.ROLE_RESTAURANT_MANAGER);
@@ -174,7 +179,7 @@ public class RestaurantService {
         if(optionalBaseUser.isEmpty()) {
             DeliveryUser user = new DeliveryUser();
             user.setEmail(dto.getEmail());
-            user.setPassword(dto.getPassword());
+            user.setPassword(passwordEncoder.encode(dto.getFirstName()) + dto.getLastName());
             user.setFirstName(dto.getFirstName());
             user.setLastName(dto.getLastName());
             user.setRole(Role.ROLE_DELIVERY_USER);
@@ -182,6 +187,11 @@ public class RestaurantService {
             return DeliveryUserDto.entityToDto(user);
         }
         return null;
+    }
+
+    public List<RestaurantManagerDto> getAllRestaurantManagers() {
+        List<RestaurantManager> restaurantManagers = restaurantManagerRepository.findAll();
+        return restaurantManagers.stream().map(RestaurantManagerDto::entityToDto).collect(toList());
     }
 
 }

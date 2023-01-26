@@ -14,9 +14,11 @@ import static java.util.stream.Collectors.toList;
 @Setter
 public class RestaurantDto {
 
+    private Long id;
     private String name;
     private String phoneNumber;
     private Double rating;
+    private Double deliveryTax;
     private Long restaurantManagerId;
     private List<LocationDto> locations;
     private List<ReviewDto> reviews;
@@ -26,9 +28,10 @@ public class RestaurantDto {
     public static @NotNull RestaurantDto entityToDto(@NotNull Restaurant restaurant) {
         RestaurantDto dto = new RestaurantDto();
         dto.setName(restaurant.getName());
+        dto.setId(restaurant.getId());
         dto.setPhoneNumber(restaurant.getPhoneNumber());
         dto.setRating(restaurant.getRating());
-
+        dto.setDeliveryTax(restaurant.getDeliveryTax());
         dto.setRestaurantManagerId(restaurant.getRestaurantManager().getId());
 
         if(restaurant.getLocations() != null){

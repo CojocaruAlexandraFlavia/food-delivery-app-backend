@@ -26,6 +26,7 @@ public class BaseUser implements UserDetails {
     private String firstName;
     private String lastName;
     private String email;
+    private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -33,10 +34,6 @@ public class BaseUser implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return singletonList(new SimpleGrantedAuthority(role.toString()));
-    }
-
-    public Long getId() {
-        return id;
     }
 
     @Override

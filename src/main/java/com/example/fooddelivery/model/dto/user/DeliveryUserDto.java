@@ -20,11 +20,13 @@ public class DeliveryUserDto extends BaseUserDto{
 
     public static @NotNull DeliveryUserDto entityToDto(@NotNull DeliveryUser deliveryUser) {
         DeliveryUserDto dto = new DeliveryUserDto();
+        dto.setId(deliveryUser.getId());
         dto.setEmail(deliveryUser.getEmail());
         dto.setLastName(deliveryUser.getLastName());
         dto.setFirstName(deliveryUser.getFirstName());
         dto.setRole(Role.ROLE_DELIVERY_USER.toString());
-        dto.setPassword(deliveryUser.getPassword());
+        //dto.setPassword(deliveryUser.getPassword());
+        dto.setPhoneNumber(deliveryUser.getPhoneNumber());
 
         if(deliveryUser.getOrders() != null) {
             dto.setOrders(deliveryUser.getOrders()
