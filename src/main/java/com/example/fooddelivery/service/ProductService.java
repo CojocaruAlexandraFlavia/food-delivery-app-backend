@@ -78,6 +78,17 @@ public class ProductService {
         return null;
     }
 
+    public boolean deleteProduct(Long productId){
+        if(productId != null){
+            Optional<Product> optionalProduct = findProductById(productId);
+            if(optionalProduct.isPresent()){
+                productRepository.delete(optionalProduct.get());
+                return true;
+            }
+        }
+        return false;
+    }
+
     public ProductDto changeProductAvailability(Long productId){
         if(productId != null){
             Optional<Product> optionalProduct = findProductById(productId);

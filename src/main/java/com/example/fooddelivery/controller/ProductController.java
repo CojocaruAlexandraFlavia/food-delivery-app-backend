@@ -44,6 +44,15 @@ public class ProductController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @DeleteMapping("/delete-by-id/{id}")
+    public ResponseEntity<?> deleteProductById(@PathVariable("id") Long id){
+        boolean result = productService.deleteProduct(id);
+        if(result){
+            return new ResponseEntity<>(HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
     @PatchMapping("/change-availability/{id}")
     public ResponseEntity<ProductDto> changeProductAvailability(@PathVariable("id") Long id){
         ProductDto result = productService.changeProductAvailability(id);
