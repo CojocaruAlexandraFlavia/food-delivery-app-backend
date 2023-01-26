@@ -12,6 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -98,10 +100,11 @@ public class ProductService {
         return allProducts.stream().map(ProductDto::entityToDto).collect(toList());
     }
 
+    @Transactional
     public List<ProductDto> getAllProductsByRestarantId(Long restaurantId) {
-        List<Product> allProducts = productRepository.findAll();
         Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
-        return allProducts.stream().map(ProductDto::entityToDto).collect(toList());
+        return optionalRestaurant.map(restaurant -> restaurant.getProducts().stream()
+                .map(ProductDto::entityToDto).collect(toList())).orElseGet(ArrayList::new);
     }
 
     public ProductDto changeProductAvailability(Long productId){

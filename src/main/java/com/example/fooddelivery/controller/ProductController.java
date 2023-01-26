@@ -51,9 +51,13 @@ public class ProductController {
         return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
     }
 
-    @GetMapping("/get-all-by-restaurantId/{id}")
-    public ResponseEntity<List<ProductDto>> getAllProductsByRestarantId(@PathVariable("id") Long id){
-        return new ResponseEntity<>(productService.getAllProductsByRestarantId(id), HttpStatus.OK);
+    @GetMapping("/get-all-by-restaurantId/{restaurantId}")
+    public ResponseEntity<List<ProductDto>> getAllProductsByRestarantId(@PathVariable("restaurantId") Long restaurantId){
+        List<ProductDto> result = productService.getAllProductsByRestarantId(restaurantId);
+        if(result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @DeleteMapping("/delete-by-id/{id}")
