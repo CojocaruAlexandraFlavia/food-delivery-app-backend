@@ -17,7 +17,7 @@ public class RestaurantManagerDto extends BaseUserDto{
         dto.setRole(Role.ROLE_RESTAURANT_MANAGER.toString());
         dto.setLastName(restaurantManager.getLastName());
         dto.setFirstName(restaurantManager.getFirstName());
-        //dto.setPassword(restaurantManager.getPassword());
+        dto.setPassword(restaurantManager.getPassword());
         dto.setId(restaurantManager.getId());
         dto.setPhoneNumber(restaurantManager.getPhoneNumber());
         return dto;
