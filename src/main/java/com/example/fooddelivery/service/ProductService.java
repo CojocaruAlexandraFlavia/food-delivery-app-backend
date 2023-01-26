@@ -5,13 +5,17 @@ import com.example.fooddelivery.model.OrderProduct;
 import com.example.fooddelivery.model.Product;
 import com.example.fooddelivery.model.Restaurant;
 import com.example.fooddelivery.model.dto.ProductDto;
+import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.ProductRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ProductService {
@@ -87,6 +91,11 @@ public class ProductService {
             }
         }
         return false;
+    }
+
+    public List<ProductDto> getAllProducts() {
+        List<Product> allProducts = productRepository.findAll();
+        return allProducts.stream().map(ProductDto::entityToDto).collect(toList());
     }
 
     public ProductDto changeProductAvailability(Long productId){
