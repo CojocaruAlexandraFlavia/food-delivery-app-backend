@@ -3,6 +3,7 @@ package com.example.fooddelivery.controller;
 import com.example.fooddelivery.model.Order;
 import com.example.fooddelivery.model.dto.CheckOrderCountDto;
 import com.example.fooddelivery.model.dto.NotificationDto;
+import com.example.fooddelivery.model.dto.ViewCartDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
 import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
@@ -67,14 +68,38 @@ public class OrderController {
 
     @PutMapping("/add-products")
     public ResponseEntity<OrderDto> addOrderProduct(@RequestBody AddOrderProductRequest addOrderProductRequest){
-        OrderDto result = orderService.addOrderProduct(addOrderProductRequest.getOrderId(),
-                addOrderProductRequest.getOrderProductId(), addOrderProductRequest.getQuantity());
+        Long clientId = addOrderProductRequest.getClientId();
+        Long productOrderId =  addOrderProductRequest.getOrderProductId();
+        int quantity = addOrderProductRequest.getQuantity();
+
+        OrderDto result = orderService.addOrderProduct(clientId, productOrderId, quantity);
         if(result == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
 
     }
+
+    @GetMapping("/cart/{clientId}")
+    public ResponseEntity<ViewCartDto> viewCart(@PathVariable("clientId") Long id){
+        ViewCartDto result = orderService.viewCart(id);
+        if(result == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+
+    }
+
+
+//    @GetMapping("/current-order/{clientId}")
+//    public ResponseEntity<OrderDto> currentOrder(@PathVariable("clientId") Long id){
+//        Optional<OrderDto> result = orderService.getCurrentOpenOrder(id);
+//        if(result == null){
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//        return new ResponseEntity<>(result, HttpStatus.OK);
+//
+//    }
 
     @PatchMapping("/see-notification/{id}")
     public ResponseEntity<NotificationDto> seeNotification(@PathVariable("id") Long id) {

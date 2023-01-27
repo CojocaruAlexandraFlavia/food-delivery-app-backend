@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     void deleteById(@NotNull Long id);
 
     Optional<Order> findByStatus(Order status);
+
+    List<Order> findByClientUserId(Long clinetId);
 
     Order findFirstByOrderByIdDesc();
 }

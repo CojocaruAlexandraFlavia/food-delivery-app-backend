@@ -88,16 +88,16 @@ public class ProductController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @PutMapping("/add-orders")
-    public ResponseEntity<ProductDto> addOrderProduct(@RequestBody AddOrderProductRequest addOrderProductRequest){
-        ProductDto result = productService.addOrderProduct(addOrderProductRequest.getOrderId(),
-                addOrderProductRequest.getOrderProductId(), addOrderProductRequest.getQuantity());
-        if(result == null){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(result, HttpStatus.OK);
-
-    }
+//    @PutMapping("/add-orders")
+//    public ResponseEntity<ProductDto> addOrderProduct(@RequestBody AddOrderProductRequest addOrderProductRequest){
+//        ProductDto result = productService.addOrderProduct(addOrderProductRequest.getOrderId(),
+//                addOrderProductRequest.getOrderProductId(), addOrderProductRequest.getQuantity());
+//        if(result == null){
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//        return new ResponseEntity<>(result, HttpStatus.OK);
+//
+//    }
 
     @PostMapping("/add-product-to-client-favorites")
     public ResponseEntity<ClientUserDto> addProductToFavorite(@RequestBody AddProductToFavoritesRequest request) {

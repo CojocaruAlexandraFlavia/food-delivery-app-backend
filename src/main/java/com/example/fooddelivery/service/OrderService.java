@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class OrderService {
@@ -34,12 +37,13 @@ public class OrderService {
     private final ClientUserService clientUserService;
     private final DeliveryUserService deliveryUserService;
     private final UserAddressRepository addressRepository;
+    private final RestaurantService restaurantService;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, NotificationRepository notificationRepository,
                         OrderProductRepository productRepository, ProductService productService,
                         ClientUserService clientUserService, DeliveryUserService deliveryUserService,
-                        UserAddressRepository addressRepository) {
+                        UserAddressRepository addressRepository, RestaurantService restaurantService) {
         this.orderRepository = orderRepository;
         this.notificationRepository = notificationRepository;
         this.orderProductRepository = productRepository;
@@ -47,6 +51,7 @@ public class OrderService {
         this.clientUserService = clientUserService;
         this.deliveryUserService = deliveryUserService;
         this.addressRepository = addressRepository;
+        this.restaurantService = restaurantService;
     }
 
     public Optional<Order> findOrderById(Long id) {
@@ -57,11 +62,76 @@ public class OrderService {
         return orderProductRepository.findById(id);
     }
 
+
+    public ViewCartDto viewCart(Long clientId){
+        Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(clientId);
+        ViewCartDto viewCartDto = new ViewCartDto();
+        viewCartDto.setClientUserId(clientId);
+
+        if(optionalClientUser.isPresent()){
+            Optional<Order> order = getCurrentOpenOrder(clientId);
+            if(order.isPresent()){
+                Order viewOrder = order.get();
+                viewCartDto.setId(viewOrder.getId());
+                viewCartDto.setNumber(viewOrder.getNumber());
+                List<OrderProductDto> orderProducts = viewOrder.getProducts().stream().map(OrderProductDto::entityToDto).collect(toList());
+                viewCartDto.setProducts(orderProducts);
+                AtomicReference<Double> value = new AtomicReference<>(0.0);
+                orderProducts.forEach(orderProductDto -> {
+                    ProductDto productDto = orderProductDto.getProductDto();
+                    Optional<Product> optionalProduct = productService.findProductById(productDto.getId());
+                    OrderProduct orderProduct = new OrderProduct();
+                    orderProduct.setQuantity(orderProductDto.getQuantity());
+                    orderProduct.setOrder(viewOrder);
+                    orderProduct.setProduct(optionalProduct.orElseThrow(EntityNotFoundException::new));
+                    double productPriceWithDiscountApplied = optionalProduct.get().getPrice() -
+                            optionalProduct.get().getDiscount() / 100 * optionalProduct.get().getPrice();
+                    value.updateAndGet(v -> v + productPriceWithDiscountApplied * orderProductDto.getQuantity());
+                viewOrder.setValue(value.get());
+
+                });
+                viewCartDto.setValue(value.get());
+                viewCartDto.setDeliveryTax(order.get().getDeliveryTax());
+                orderRepository.save(viewOrder);
+                return viewCartDto;
+            }
+        }
+        return null;
+
+    }
+
+
+    public OrderDto sendOrder(@NotNull Long clientId){
+        Optional<Order> order = getCurrentOpenOrder(clientId);
+        if(order.isPresent()){
+            Order currentOrder = order.get();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+            currentOrder.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
+            List<UserAddress> addresses = addressRepository.findByClientUserId(clientId);
+            Optional<UserAddress> userAddress = addresses.stream().filter(checkedAddress ->
+                    checkedAddress.getChecked().equals(true)).findAny();
+            if(userAddress.isPresent()) {
+                currentOrder.setDeliveryAddress(userAddress.get());
+                currentOrder.setStatus(OrderStatus.RECEIVED);
+
+                Notification notification = new Notification();
+                notification.setOrder(currentOrder);
+                notification.setType(NotificationType.ORDER_RECEIVED);
+                notification.setSeen(false);
+                notificationRepository.save(notification);
+                return OrderDto.entityToDto(orderRepository.save(currentOrder));
+
+            }
+
+        }
+        return null;
+    }
+
+
     public OrderDto saveOrder(@NotNull OrderDto orderDto){
         Order order = new Order();
         Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(orderDto.getClientUserId());
         Optional<DeliveryUser> optionalDeliveryUser = deliveryUserService.findDeliveryUserById(orderDto.getDeliveryUserId());
-
         if(optionalClientUser.isPresent() && optionalDeliveryUser.isPresent()){
 
             //set delivery address
@@ -79,18 +149,11 @@ public class OrderService {
                 order.setDeliveryAddress(userAddress);
             }
 
-            //set order number
-            Order lastSavedOrder = orderRepository.findFirstByOrderByIdDesc();
-            if(lastSavedOrder != null) {
-                order.setNumber(lastSavedOrder.getNumber() + 1L);
-            } else {
-                order.setNumber(1L);
-            }
 
             //save order
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
             order.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
-            order.setStatus(OrderStatus.RECEIVED);
+            order.setStatus(OrderStatus.OPEN);
             order.setClientUser(optionalClientUser.get());
             order.setDeliveryUser(optionalDeliveryUser.get());
             order.setPaymentType(PaymentType.valueOf(orderDto.getPaymentType()));
@@ -117,12 +180,13 @@ public class OrderService {
             savedOrder.setValue(value.get());
 
             //send notification
-            Notification notification = new Notification();
-            notification.setOrder(savedOrder);
-            notification.setType(NotificationType.ORDER_RECEIVED);
-            notification.setSeen(false);
-            notificationRepository.save(notification);
+//            Notification notification = new Notification();
+//            notification.setOrder(savedOrder);
+//            notification.setType(NotificationType.ORDER_RECEIVED);
+//            notification.setSeen(false);
+//            notificationRepository.save(notification);
             return OrderDto.entityToDto(orderRepository.save(savedOrder));
+           // return OrderDto.entityToDto(orderRepository.save(savedOrder));
         }
         return null;
     }
@@ -169,13 +233,59 @@ public class OrderService {
         }
         return false;
     }
+    //or create new open order
+    public Optional<Order> getCurrentOpenOrder(Long clientId){
+        List<Order> orders = orderRepository.findByClientUserId(clientId);
+        List<Order> expiredOpenOrders = orders.stream().filter(matchOrder ->
+                matchOrder.getDateTime().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+        for (Order o: expiredOpenOrders) {
+            deleteOrder(o.getId());
+        }
+        Optional<Order> order = orders.stream().filter(matchOrder ->
+                matchOrder.getDateTime().toString().substring(0,10).equals(LocalDateTime.now().toString().substring(0,10))).findAny();
+        if(order.isPresent()){
+            if(order.get().getStatus().equals(OrderStatus.OPEN)){
+                return order;
+            }
+        }
+       return Optional.empty();
+    }
 
-    public OrderDto addOrderProduct(Long orderId, Long orderProductId, int quantity){
-        Optional<Order> optionalOrder = findOrderById(orderId);
-        Optional<OrderProduct> optionalOrderProduct = findOrderProductById(orderProductId);
 
-        if(optionalOrder.isPresent() && optionalOrderProduct.isPresent()){
-            Order order = optionalOrder.get();
+    public Order createOpenOrder(Long clientId, Long restaurantId){
+        Optional<ClientUser> clientUser = clientUserService.findClientUserById(clientId);
+        Optional<Restaurant> restaurant = restaurantService.findRestaurantById(restaurantId);
+        if(clientUser.isPresent() && restaurant.isPresent()){
+            Order order = new Order();
+
+            //set order number
+            Order lastSavedOrder = orderRepository.findFirstByOrderByIdDesc();
+            if(lastSavedOrder != null) {
+                order.setNumber(lastSavedOrder.getNumber() + 1L);
+            } else {
+                order.setNumber(1L);
+            }
+            //save order
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+            order.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
+            order.setStatus(OrderStatus.OPEN);
+            order.setClientUser(clientUser.get());
+            order.setDeliveryTax(restaurant.get().getDeliveryTax());
+            order.setPaymentType(PaymentType.CARD_ONLINE);
+            return orderRepository.save(order);
+        }
+        return null;
+    }
+
+    public OrderDto addOrderProduct(Long clientId, Long productId, int quantity){
+        Optional<Order> optionalOrder = getCurrentOpenOrder(clientId);
+        Optional<OrderProduct> optionalOrderProduct = orderProductRepository.findById(productId);
+
+        Order order = new Order();
+        if(optionalOrder.isPresent() && optionalOrderProduct.isPresent()) {
+            order = optionalOrder.get();
+        }else{
+            order = createOpenOrder(clientId, optionalOrderProduct.get().getProduct().getRestaurant().getId());
             OrderProduct op = new OrderProduct();
             op.setQuantity(quantity);
             orderProductRepository.save(op);
