@@ -56,7 +56,13 @@ public class OrderDto {
             dto.setNotifications(new ArrayList<>());
         }
         dto.setClientUserId(order.getClientUser().getId());
-        dto.setDeliveryUserId(order.getDeliveryUser().getId());
+
+        if(order.getDeliveryUser() != null) {
+            dto.setDeliveryUserId(order.getDeliveryUser().getId());
+        } else {
+            dto.setDeliveryUserId(null);
+        }
+
         return dto;
     }
 

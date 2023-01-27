@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 public class OrderService {
 
@@ -60,9 +62,9 @@ public class OrderService {
     public OrderDto saveOrder(@NotNull OrderDto orderDto){
         Order order = new Order();
         Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(orderDto.getClientUserId());
-        Optional<DeliveryUser> optionalDeliveryUser = deliveryUserService.findDeliveryUserById(orderDto.getDeliveryUserId());
+        //Optional<DeliveryUser> optionalDeliveryUser = deliveryUserService.findDeliveryUserById(orderDto.getDeliveryUserId());
 
-        if(optionalClientUser.isPresent() && optionalDeliveryUser.isPresent()){
+        if(optionalClientUser.isPresent()){ //&& optionalDeliveryUser.isPresent()){
 
             //set delivery address
             UserAddressDto deliveryAddressDto = orderDto.getDeliveryAddress();
@@ -92,7 +94,7 @@ public class OrderService {
             order.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
             order.setStatus(OrderStatus.RECEIVED);
             order.setClientUser(optionalClientUser.get());
-            order.setDeliveryUser(optionalDeliveryUser.get());
+            //order.setDeliveryUser(optionalDeliveryUser.get());
             order.setPaymentType(PaymentType.valueOf(orderDto.getPaymentType()));
             order.setDeliveryTax(orderDto.getDeliveryTax());
             Order savedOrder = orderRepository.save(order);
@@ -200,5 +202,27 @@ public class OrderService {
         checkOrderCountDto.setTotalCount(price);
         checkOrderCountDto.setNumberOfOrders(orders);
         return checkOrderCountDto;
+    }
+
+    public List<OrderDto> getOrdersByStatus(String status) {
+        if(EnumUtils.isValidEnumIgnoreCase(OrderStatus.class, status)) {
+            List<Order> filteredOrders = orderRepository.findByStatus(OrderStatus.valueOf(status.toUpperCase()));
+            return filteredOrders.stream().map(OrderDto::entityToDto).collect(toList());
+        }
+        return new ArrayList<>();
+    }
+
+    public OrderDto assignDeliverToOrder(Long orderId, Long deliverId) {
+        Optional<Order> optionalOrder = findOrderById(orderId);
+        Optional<DeliveryUser> optionalDeliveryUser = deliveryUserService.findDeliveryUserById(deliverId);
+
+        if(optionalOrder.isPresent() && optionalDeliveryUser.isPresent()) {
+            Order order = optionalOrder.get();
+            order.setDeliveryUser(optionalDeliveryUser.get());
+            order = orderRepository.save(order);
+            return OrderDto.entityToDto(order);
+        }
+
+        return null;
     }
 }

@@ -118,4 +118,23 @@ public class OrderController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
+    @GetMapping("/get-by-status/{status}")
+    public ResponseEntity<List<OrderDto>> getOrdersByStatus(@PathVariable("status") String status) {
+        List<OrderDto> result = orderService.getOrdersByStatus(status);
+        if(result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PatchMapping("/assign-deliver-to-order/{orderId}/{deliveryUserId}")
+    public ResponseEntity<OrderDto> assignDeliverToOrder(@PathVariable("orderId") Long orderId,
+                                                         @PathVariable("deliveryUserId") Long deliverId) {
+        OrderDto result = orderService.assignDeliverToOrder(orderId, deliverId);
+        if(result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
 }
