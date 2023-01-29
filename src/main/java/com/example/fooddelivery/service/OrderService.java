@@ -59,7 +59,7 @@ public class OrderService {
         return orderProductRepository.findById(id);
     }
 
-    public OrderDto saveOrder(@NotNull OrderDto orderDto){
+    public OrderDto saveOrder(@NotNull OrderDto orderDto) {
         Order order = new Order();
         Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(orderDto.getClientUserId());
         //Optional<DeliveryUser> optionalDeliveryUser = deliveryUserService.findDeliveryUserById(orderDto.getDeliveryUserId());
@@ -129,7 +129,7 @@ public class OrderService {
         return null;
     }
 
-    public NotificationDto seeNotification(Long notificationId){
+    public NotificationDto seeNotification(Long notificationId) {
         Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
         if(optionalNotification.isPresent()){
             Notification notification = optionalNotification.get();
@@ -140,28 +140,31 @@ public class OrderService {
         return null;
     }
 
-    public OrderDto updateOrderStatus(Long orderId, String newStatus){
+    public OrderDto updateOrderStatus(Long orderId, String newStatus) {
         Optional<Order> optionalOrder = findOrderById(orderId);
-        if(optionalOrder.isPresent() && EnumUtils.isValidEnum(OrderStatus.class, newStatus)){
+        if(optionalOrder.isPresent() && EnumUtils.isValidEnum(OrderStatus.class, newStatus)) {
             Order order = optionalOrder.get();
             OrderStatus orderStatus = OrderStatus.valueOf(newStatus);
             order.setStatus(orderStatus);
 
-            //send notification if order is picked up
-            if (orderStatus.equals(OrderStatus.PICKED_UP)) {
-                Notification notification = new Notification();
-                notification.setSeen(false);
-                notification.setOrder(order);
+            //send notification about order status
+            Notification notification = new Notification();
+            notification.setSeen(false);
+            notification.setOrder(order);
+            if(orderStatus.equals(OrderStatus.PICKED_UP)) {
                 notification.setType(NotificationType.ORDER_PICKED_UP);
-                notificationRepository.save(notification);
+            } else if (orderStatus.equals(OrderStatus.ON_THE_WAY)) {
+                notification.setType(NotificationType.ORDER_ON_THE_WAY);
+            } else {
+                notification.setType(NotificationType.ORDER_DELIVERED);
             }
-
+            notificationRepository.save(notification);
             return OrderDto.entityToDto(orderRepository.save(order));
         }
         return null;
     }
 
-    public boolean deleteOrder(Long orderId){
+    public boolean deleteOrder(Long orderId) {
         if(orderId != null){
             Optional<Order> optionalOrder = findOrderById(orderId);
             if(optionalOrder.isPresent()){
@@ -172,7 +175,7 @@ public class OrderService {
         return false;
     }
 
-    public OrderDto addOrderProduct(Long orderId, Long orderProductId, int quantity){
+    public OrderDto addOrderProduct(Long orderId, Long orderProductId, int quantity) {
         Optional<Order> optionalOrder = findOrderById(orderId);
         Optional<OrderProduct> optionalOrderProduct = findOrderProductById(orderProductId);
 
@@ -186,11 +189,11 @@ public class OrderService {
         return null;
     }
 
-    public List<Order> getAll(){
+    public List<Order> getAll() {
         return orderRepository.findAll();
     }
 
-    public double getTotalCounts(){
+    public double getTotalCounts() {
         List<Order> orders = orderRepository.findAll();
         return orders.stream().mapToDouble(Order::getValue).sum();
     }
