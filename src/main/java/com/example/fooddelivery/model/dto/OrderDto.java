@@ -29,6 +29,7 @@ public class OrderDto {
     private List<OrderProductDto> products;
 
     private Long clientUserId;
+    private Long deliveryUserId;
     private UserAddressDto deliveryAddress;
 
     public static @NotNull OrderDto entityToDto(@NotNull Order order) {
@@ -60,6 +61,12 @@ public class OrderDto {
             dto.setNotifications(new ArrayList<>());
         }
         dto.setClientUserId(order.getClientUser().getId());
+
+        if(order.getDeliveryUser() != null) {
+            dto.setDeliveryUserId(order.getDeliveryUser().getId());
+        } else {
+            dto.setDeliveryUserId(null);
+        }
 
         return dto;
     }

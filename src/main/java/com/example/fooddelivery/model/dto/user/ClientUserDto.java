@@ -25,13 +25,13 @@ public class ClientUserDto extends BaseUserDto{
 
     public static @NotNull ClientUserDto entityToDto(@NotNull ClientUser clientUser) {
         ClientUserDto clientUserDto = new ClientUserDto();
-        clientUserDto.setId(clientUserDto.getId());
+        clientUserDto.setId(clientUser.getId());
         clientUserDto.setEmail(clientUser.getEmail());
         clientUserDto.setLastName(clientUser.getLastName());
         clientUserDto.setFirstName(clientUser.getFirstName());
         clientUserDto.setRole(Role.ROLE_CLIENT_USER.toString());
-        //clientUserDto.setPassword(clientUser.getPassword());
-        clientUserDto.setPhoneNumber(clientUserDto.getPhoneNumber());
+        clientUserDto.setPassword(clientUser.getPassword());
+        clientUserDto.setPhoneNumber(clientUser.getPhoneNumber());
 
         if(clientUser.getAddresses() != null) {
             clientUserDto.setAddresses(clientUser.getAddresses()

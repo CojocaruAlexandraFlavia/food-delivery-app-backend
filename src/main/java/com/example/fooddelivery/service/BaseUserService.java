@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -79,6 +80,24 @@ public class BaseUserService implements UserDetailsService {
         } else {
             return RestaurantManagerDto.entityToDto((RestaurantManager) baseUser);
         }
+    }
+
+    public AdminUserDto updateAdmin(Long id, AdminUserDto dto) {
+        Optional<BaseUser> optionalBaseUser = findUserById(id);
+        if(optionalBaseUser.isPresent()) {
+            Admin admin = (Admin) optionalBaseUser.get();
+            Optional<BaseUser> baseUserOptional = findUserByEmail(dto.getEmail());
+            if(baseUserOptional.isPresent() && !Objects.equals(admin.getId(), baseUserOptional.get().getId())) {
+                return null;
+            }
+            admin.setFirstName(dto.getFirstName());
+            admin.setLastName(dto.getLastName());
+            admin.setEmail(dto.getEmail());
+            admin.setPhoneNumber(dto.getPhoneNumber());
+            admin = baseUserRepository.save(admin);
+            return AdminUserDto.entityToDto(admin);
+        }
+        return null;
     }
 
 }

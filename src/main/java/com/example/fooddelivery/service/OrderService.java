@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
 public class OrderService {
 
@@ -129,6 +131,13 @@ public class OrderService {
         if(order.isPresent()){
             Order currentOrder = order.get();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
+            order.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
+            order.setStatus(OrderStatus.RECEIVED);
+            order.setClientUser(optionalClientUser.get());
+            //order.setDeliveryUser(optionalDeliveryUser.get());
+            order.setPaymentType(PaymentType.valueOf(orderDto.getPaymentType()));
+            order.setDeliveryTax(orderDto.getDeliveryTax());
+            Order savedOrder = orderRepository.save(order);
             currentOrder.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
             List<UserAddress> addresses = addressRepository.findByClientUserId(clientId);
             Optional<UserAddress> userAddress = addresses.stream().filter(checkedAddress ->
@@ -162,28 +171,31 @@ public class OrderService {
         return null;
     }
 
-    public OrderDto updateOrderStatus(Long orderId, String newStatus){
+    public OrderDto updateOrderStatus(Long orderId, String newStatus) {
         Optional<Order> optionalOrder = findOrderById(orderId);
-        if(optionalOrder.isPresent() && EnumUtils.isValidEnum(OrderStatus.class, newStatus)){
+        if(optionalOrder.isPresent() && EnumUtils.isValidEnum(OrderStatus.class, newStatus)) {
             Order order = optionalOrder.get();
             OrderStatus orderStatus = OrderStatus.valueOf(newStatus);
             order.setStatus(orderStatus);
 
-            //send notification if order is picked up
-            if (orderStatus.equals(OrderStatus.PICKED_UP)) {
-                Notification notification = new Notification();
-                notification.setSeen(false);
-                notification.setOrder(order);
+            //send notification about order status
+            Notification notification = new Notification();
+            notification.setSeen(false);
+            notification.setOrder(order);
+            if(orderStatus.equals(OrderStatus.PICKED_UP)) {
                 notification.setType(NotificationType.ORDER_PICKED_UP);
-                notificationRepository.save(notification);
+            } else if (orderStatus.equals(OrderStatus.ON_THE_WAY)) {
+                notification.setType(NotificationType.ORDER_ON_THE_WAY);
+            } else {
+                notification.setType(NotificationType.ORDER_DELIVERED);
             }
-
+            notificationRepository.save(notification);
             return OrderDto.entityToDto(orderRepository.save(order));
         }
         return null;
     }
 
-    public boolean deleteOrder(Long orderId){
+    public boolean deleteOrder(Long orderId) {
         if(orderId != null){
             Optional<Order> optionalOrder = findOrderById(orderId);
             if(optionalOrder.isPresent()){
@@ -319,11 +331,11 @@ public class OrderService {
          return null;
     }
 
-    public List<Order> getAll(){
+    public List<Order> getAll() {
         return orderRepository.findAll();
     }
 
-    public double getTotalCounts(){
+    public double getTotalCounts() {
         List<Order> orders = orderRepository.findAll();
         return orders.stream().mapToDouble(Order::getValue).sum();
     }
@@ -335,5 +347,27 @@ public class OrderService {
         checkOrderCountDto.setTotalCount(price);
         checkOrderCountDto.setNumberOfOrders(orders);
         return checkOrderCountDto;
+    }
+
+    public List<OrderDto> getOrdersByStatus(String status) {
+        if(EnumUtils.isValidEnumIgnoreCase(OrderStatus.class, status)) {
+            List<Order> filteredOrders = orderRepository.findByStatus(OrderStatus.valueOf(status.toUpperCase()));
+            return filteredOrders.stream().map(OrderDto::entityToDto).collect(toList());
+        }
+        return new ArrayList<>();
+    }
+
+    public OrderDto assignDeliverToOrder(Long orderId, Long deliverId) {
+        Optional<Order> optionalOrder = findOrderById(orderId);
+        Optional<DeliveryUser> optionalDeliveryUser = deliveryUserService.findDeliveryUserById(deliverId);
+
+        if(optionalOrder.isPresent() && optionalDeliveryUser.isPresent()) {
+            Order order = optionalOrder.get();
+            order.setDeliveryUser(optionalDeliveryUser.get());
+            order = orderRepository.save(order);
+            return OrderDto.entityToDto(order);
+        }
+
+        return null;
     }
 }
