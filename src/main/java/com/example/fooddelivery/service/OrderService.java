@@ -5,6 +5,7 @@ import com.example.fooddelivery.enums.OrderStatus;
 import com.example.fooddelivery.enums.PaymentType;
 import com.example.fooddelivery.model.*;
 import com.example.fooddelivery.model.dto.*;
+import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.repository.NotificationRepository;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.OrderRepository;
@@ -67,34 +68,56 @@ public class OrderService {
         Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(clientId);
         ViewCartDto viewCartDto = new ViewCartDto();
         viewCartDto.setClientUserId(clientId);
-
         if(optionalClientUser.isPresent()){
             Optional<Order> order = getCurrentOpenOrder(clientId);
             if(order.isPresent()){
                 Order viewOrder = order.get();
-                viewCartDto.setId(viewOrder.getId());
+                viewCartDto.setOrderId(viewOrder.getId());
                 viewCartDto.setNumber(viewOrder.getNumber());
                 List<OrderProductDto> orderProducts = viewOrder.getProducts().stream().map(OrderProductDto::entityToDto).collect(toList());
                 viewCartDto.setProducts(orderProducts);
-                AtomicReference<Double> value = new AtomicReference<>(0.0);
-                orderProducts.forEach(orderProductDto -> {
-                    ProductDto productDto = orderProductDto.getProductDto();
-                    Optional<Product> optionalProduct = productService.findProductById(productDto.getId());
-                    OrderProduct orderProduct = new OrderProduct();
-                    orderProduct.setQuantity(orderProductDto.getQuantity());
-                    orderProduct.setOrder(viewOrder);
-                    orderProduct.setProduct(optionalProduct.orElseThrow(EntityNotFoundException::new));
-                    double productPriceWithDiscountApplied = optionalProduct.get().getPrice() -
-                            optionalProduct.get().getDiscount() / 100 * optionalProduct.get().getPrice();
-                    value.updateAndGet(v -> v + productPriceWithDiscountApplied * orderProductDto.getQuantity());
-                viewOrder.setValue(value.get());
-
-                });
-                viewCartDto.setValue(value.get());
+                viewCartDto.setValue(order.get().getValue());
                 viewCartDto.setDeliveryTax(order.get().getDeliveryTax());
                 orderRepository.save(viewOrder);
                 return viewCartDto;
             }
+        }
+        return null;
+
+    }
+
+    public ViewCartDto decreaseQuantityOfProduct(Long productId, Long clientId){
+        Optional<Product> orderProduct = productService.findProductById(productId);
+        Optional<Order> order = getCurrentOpenOrder(clientId);
+
+        if(orderProduct.isPresent() && order.isPresent()){
+            Product product = orderProduct.get();
+            Order updatedOrder = order.get();
+            List<OrderProduct> orderProducts = updatedOrder.getProducts();
+            OrderProduct orderProductUpdated = new OrderProduct();
+            for (OrderProduct orderProduct1: updatedOrder.getProducts()) {
+                if (orderProduct1.getProduct().getId().equals(productId)) {
+                    orderProductUpdated.setOrder(updatedOrder);
+                    orderProductUpdated.setProduct(product);
+                    orderProductUpdated.setQuantity(orderProduct1.getQuantity() - 1);
+                    if (orderProduct1.getQuantity() - 1 == 0) {
+                        System.out.println("da");
+                        orderProducts.remove(orderProductUpdated);
+                        updatedOrder.setProducts(orderProducts);
+                        updatedOrder = orderRepository.save(updatedOrder);
+                        orderProductRepository.delete(orderProductUpdated);
+
+                    } else {
+                        updatedOrder = orderRepository.save(updatedOrder);
+                        orderProductUpdated = orderProductRepository.save(orderProductUpdated);
+
+                    }
+
+                }
+            }
+
+
+            return viewCart(order.get().getClientUser().getId());
         }
         return null;
 
@@ -127,69 +150,6 @@ public class OrderService {
         return null;
     }
 
-
-    public OrderDto saveOrder(@NotNull OrderDto orderDto){
-        Order order = new Order();
-        Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(orderDto.getClientUserId());
-        Optional<DeliveryUser> optionalDeliveryUser = deliveryUserService.findDeliveryUserById(orderDto.getDeliveryUserId());
-        if(optionalClientUser.isPresent() && optionalDeliveryUser.isPresent()){
-
-            //set delivery address
-            UserAddressDto deliveryAddressDto = orderDto.getDeliveryAddress();
-            if(deliveryAddressDto.getId() != null) {
-                Optional<UserAddress> optionalUserAddress = addressRepository.findById(deliveryAddressDto.getId());
-                optionalUserAddress.ifPresent(order::setDeliveryAddress);
-            } else {
-                UserAddress userAddress = new UserAddress();
-                userAddress.setAddress(deliveryAddressDto.getAddress());
-                userAddress.setCity(deliveryAddressDto.getCity());
-                userAddress.setZipCode(deliveryAddressDto.getZipCode());
-                userAddress.setClientUser(optionalClientUser.get());
-                userAddress = addressRepository.save(userAddress);
-                order.setDeliveryAddress(userAddress);
-            }
-
-
-            //save order
-            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
-            order.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
-            order.setStatus(OrderStatus.OPEN);
-            order.setClientUser(optionalClientUser.get());
-            order.setDeliveryUser(optionalDeliveryUser.get());
-            order.setPaymentType(PaymentType.valueOf(orderDto.getPaymentType()));
-            order.setDeliveryTax(orderDto.getDeliveryTax());
-            Order savedOrder = orderRepository.save(order);
-
-            //save order products
-            List<OrderProduct> orderProducts = new ArrayList<>();
-            AtomicReference<Double> value = new AtomicReference<>(0.0);
-            orderDto.getProducts().forEach(orderProductDto -> {
-                ProductDto productDto = orderProductDto.getProductDto();
-                Optional<Product> optionalProduct = productService.findProductById(productDto.getId());
-                OrderProduct orderProduct = new OrderProduct();
-                orderProduct.setQuantity(orderProductDto.getQuantity());
-                orderProduct.setOrder(savedOrder);
-                orderProduct.setProduct(optionalProduct.orElseThrow(EntityNotFoundException::new));
-                orderProducts.add(orderProduct);
-                double productPriceWithDiscountApplied = optionalProduct.get().getPrice() -
-                        optionalProduct.get().getDiscount() / 100 * optionalProduct.get().getPrice();
-                value.updateAndGet(v -> v + productPriceWithDiscountApplied * orderProductDto.getQuantity());
-            });
-            List<OrderProduct> savedOrderProducts = orderProductRepository.saveAll(orderProducts);
-            savedOrder.setProducts(savedOrderProducts);
-            savedOrder.setValue(value.get());
-
-            //send notification
-//            Notification notification = new Notification();
-//            notification.setOrder(savedOrder);
-//            notification.setType(NotificationType.ORDER_RECEIVED);
-//            notification.setSeen(false);
-//            notificationRepository.save(notification);
-            return OrderDto.entityToDto(orderRepository.save(savedOrder));
-           // return OrderDto.entityToDto(orderRepository.save(savedOrder));
-        }
-        return null;
-    }
 
     public NotificationDto seeNotification(Long notificationId){
         Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
@@ -235,19 +195,26 @@ public class OrderService {
     }
     //or create new open order
     public Optional<Order> getCurrentOpenOrder(Long clientId){
+
         List<Order> orders = orderRepository.findByClientUserId(clientId);
+
         List<Order> expiredOpenOrders = orders.stream().filter(matchOrder ->
-                matchOrder.getDateTime().isBefore(LocalDateTime.now())).collect(Collectors.toList());
+                matchOrder.getDateTime().toLocalDate().isBefore(LocalDateTime.now().toLocalDate()) && matchOrder.getStatus().equals(OrderStatus.OPEN)).collect(Collectors.toList());
         for (Order o: expiredOpenOrders) {
+            for(OrderProduct orderProduct : o.getProducts()){
+                orderProductRepository.delete(orderProduct);
+            }
             deleteOrder(o.getId());
         }
+
         Optional<Order> order = orders.stream().filter(matchOrder ->
-                matchOrder.getDateTime().toString().substring(0,10).equals(LocalDateTime.now().toString().substring(0,10))).findAny();
+                matchOrder.getDateTime().toString().substring(0,10).equals(LocalDateTime.now().toString().substring(0,10))).filter(matchOrder ->
+                matchOrder.getStatus().equals(OrderStatus.OPEN)).findAny();
         if(order.isPresent()){
-            if(order.get().getStatus().equals(OrderStatus.OPEN)){
+                System.out.println("are si OPEN");
                 return order;
-            }
         }
+
        return Optional.empty();
     }
 
@@ -270,28 +237,86 @@ public class OrderService {
             order.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
             order.setStatus(OrderStatus.OPEN);
             order.setClientUser(clientUser.get());
+
             order.setDeliveryTax(restaurant.get().getDeliveryTax());
             order.setPaymentType(PaymentType.CARD_ONLINE);
+            order.setValue(0.0);
+            order.setNotifications(new ArrayList<>());
+            order.setProducts(new ArrayList<>());
             return orderRepository.save(order);
         }
         return null;
     }
 
-    public OrderDto addOrderProduct(Long clientId, Long productId, int quantity){
-        Optional<Order> optionalOrder = getCurrentOpenOrder(clientId);
-        Optional<OrderProduct> optionalOrderProduct = orderProductRepository.findById(productId);
 
+
+
+
+    public OrderDto addOrderProduct(AddOrderProductRequest addOrderProductRequest){
+
+        Long clientId = addOrderProductRequest.getClientId();
+        Long productId = addOrderProductRequest.getProductId();
+        int quantity = addOrderProductRequest.getQuantity();
+
+        Optional<Order> optionalOrder = getCurrentOpenOrder(clientId);
+        OrderProduct orderProduct = new OrderProduct();
+
+        Optional<Product> productOptional = productService.findProductById(productId);
         Order order = new Order();
-        if(optionalOrder.isPresent() && optionalOrderProduct.isPresent()) {
-            order = optionalOrder.get();
-        }else{
-            order = createOpenOrder(clientId, optionalOrderProduct.get().getProduct().getRestaurant().getId());
-            OrderProduct op = new OrderProduct();
-            op.setQuantity(quantity);
-            orderProductRepository.save(op);
-            return OrderDto.entityToDto(orderRepository.save(order));
+
+
+        if(productOptional.isPresent()){
+            Product product = productOptional.get();
+            Long restaurantId = productOptional.get().getRestaurant().getId();
+            if(optionalOrder.isPresent()){
+                System.out.println("order pre existent");
+                order = optionalOrder.get();
+                Boolean found = false;
+                for (OrderProduct orderProduct1: order.getProducts()) {
+                    if(orderProduct1.getProduct().getId().equals(productId)){
+                        orderProduct.setOrder(order);
+                        orderProduct.setProduct(product);
+                        orderProduct.setQuantity(orderProduct1.getQuantity() + quantity);
+                        orderProduct = orderProductRepository.save(orderProduct);
+                        found = true;
+                    }
+                }
+                if(!found){
+                    orderProduct.setOrder(order);
+                    orderProduct.setQuantity(quantity);
+                    orderProduct.setProduct(product);
+                    orderProduct = orderProductRepository.save(orderProduct);
+                    List<OrderProduct> orderProducts = order.getProducts();
+                    orderProducts.add(orderProduct);
+                    order.setProducts(orderProducts);
+
+                }
+
+            }else {
+                order = createOpenOrder(clientId, restaurantId);
+                orderProduct.setOrder(order);
+                orderProduct.setQuantity(quantity);
+                orderProduct.setProduct(product);
+                orderProduct = orderProductRepository.save(orderProduct);
+                List<OrderProduct> orderProducts = new ArrayList<>();
+                orderProducts.add(orderProduct);
+                order.setProducts(orderProducts);
+
+            }
+
+            Double oldValue =  order.getValue();
+            double productPriceWithDiscountApplied = product.getPrice() -
+                        product.getDiscount() / 100 * product.getPrice();
+            Double updatedValue = oldValue + (productPriceWithDiscountApplied * quantity);
+            order.setValue(updatedValue);
+
+            order = orderRepository.save(order);
+            System.out.println(order.getDeliveryTax());
+            return OrderDto.entityToDto(order);
+
         }
-        return null;
+
+         return null;
     }
 
     public List<Order> getAll(){

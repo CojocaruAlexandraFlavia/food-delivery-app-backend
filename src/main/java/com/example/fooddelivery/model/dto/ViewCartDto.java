@@ -12,20 +12,22 @@ import java.util.List;
 @Setter
 public class ViewCartDto {
 
-    private Long id;
+
     private UserAddressDto deliveryAddress;
     private List<OrderProductDto> products;
     private Long number;
     private Double deliveryTax;
     private Double value;
     private Long clientUserId;
+    private Long orderId;
 
     public static @NotNull ViewCartDto entityToDto(@NotNull Order order) {
         ViewCartDto dto = new ViewCartDto();
-        dto.setId(order.getId());
+
         dto.setNumber(order.getNumber());
         dto.setDeliveryTax(order.getDeliveryTax());
         dto.setClientUserId(order.getClientUser().getId());
+        dto.setOrderId(order.getId());
         return dto;
     }
 }

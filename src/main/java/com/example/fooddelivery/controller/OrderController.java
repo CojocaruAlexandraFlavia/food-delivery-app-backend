@@ -6,6 +6,7 @@ import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.ViewCartDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.model.dto.requests.UpdateCartProduct;
 import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
 import com.example.fooddelivery.service.DeliveryUserService;
 import com.example.fooddelivery.service.OrderService;
@@ -32,10 +33,10 @@ public class OrderController {
         this.deliveryUserService = deliveryUserService;
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<OrderDto> saveOrder(@RequestBody OrderDto orderDto){
-        return ResponseEntity.of(Optional.of(orderService.saveOrder(orderDto)));
-    }
+//    @PostMapping("/save")
+//    public ResponseEntity<OrderDto> saveOrder(@RequestBody OrderDto orderDto){
+//        return ResponseEntity.of(Optional.of(orderService.saveOrder(orderDto)));
+//    }
 
     @GetMapping("/get-by-id/{id}")
     public ResponseEntity<OrderDto> findOrderById(@PathVariable("id") Long id){
@@ -68,11 +69,8 @@ public class OrderController {
 
     @PutMapping("/add-products")
     public ResponseEntity<OrderDto> addOrderProduct(@RequestBody AddOrderProductRequest addOrderProductRequest){
-        Long clientId = addOrderProductRequest.getClientId();
-        Long productOrderId =  addOrderProductRequest.getOrderProductId();
-        int quantity = addOrderProductRequest.getQuantity();
 
-        OrderDto result = orderService.addOrderProduct(clientId, productOrderId, quantity);
+        OrderDto result = orderService.addOrderProduct(addOrderProductRequest);
         if(result == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -88,6 +86,15 @@ public class OrderController {
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
 
+    }
+
+    @PostMapping("/cart/decrease-quantity")
+    public ResponseEntity<ViewCartDto> decreaseQuantityOfProduct(@RequestBody UpdateCartProduct updateCartProduct){
+        ViewCartDto result = orderService.decreaseQuantityOfProduct(updateCartProduct.getProductId(), updateCartProduct.getClientId());
+        if(result == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 

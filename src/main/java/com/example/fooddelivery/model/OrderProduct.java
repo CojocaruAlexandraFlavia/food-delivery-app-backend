@@ -23,4 +23,5 @@ public class OrderProduct {
 
     private int quantity;
 
+
 }
