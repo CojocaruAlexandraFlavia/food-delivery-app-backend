@@ -37,4 +37,12 @@ public class ClientUser extends BaseUser {
         products.add(product);
     }
 
+    public void addAddress(UserAddress address) {
+        addresses.add(address);
+    }
+
+    public void deleteAddress(UserAddress address) {
+        addresses.remove(address);
+    }
+
 }

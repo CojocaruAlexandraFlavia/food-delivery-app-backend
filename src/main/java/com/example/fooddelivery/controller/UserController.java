@@ -1,6 +1,7 @@
 package com.example.fooddelivery.controller;
 
 
+import com.example.fooddelivery.model.dto.UserAddressDto;
 import com.example.fooddelivery.model.dto.user.AdminUserDto;
 import com.example.fooddelivery.model.dto.user.ClientUserDto;
 import com.example.fooddelivery.service.BaseUserService;
@@ -45,5 +46,33 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/add-client-address/{clientId}")
+    public ResponseEntity<ClientUserDto> addUserAddress(@RequestBody UserAddressDto dto,
+                                                        @PathVariable("clientId") Long clientId) {
+        ClientUserDto result = clientUserService.addClientAddress(dto, clientId);
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    @PutMapping("/edit-address/{id}")
+    public ResponseEntity<ClientUserDto> editAddress(@RequestBody UserAddressDto dto,
+                                                     @PathVariable("id") Long addressId) {
+        ClientUserDto result = clientUserService.editAddress(dto, addressId);
+        if (result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-address/{id}")
+    public ResponseEntity<?> deleteAddress(@PathVariable("id") Long id) {
+        ClientUserDto result = clientUserService.deleteAddress(id);
+        if(result != null) {
+            return new ResponseEntity<>(result, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }
