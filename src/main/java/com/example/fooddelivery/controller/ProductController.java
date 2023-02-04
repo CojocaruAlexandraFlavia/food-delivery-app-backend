@@ -1,6 +1,7 @@
 package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Product;
+import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.requests.AddProductToFavoritesRequest;
 import com.example.fooddelivery.model.dto.ProductDto;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -40,6 +42,29 @@ public class ProductController {
         if(optionalProduct.isPresent()){
             ProductDto productDto = ProductDto.entityToDto(optionalProduct.get());
             return new ResponseEntity<>(productDto, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/get-all")
+    public ResponseEntity<List<ProductDto>> getAllProducts() {
+        return new ResponseEntity<>(productService.getAllProducts(), HttpStatus.OK);
+    }
+
+    @GetMapping("/get-all-by-restaurantId/{restaurantId}")
+    public ResponseEntity<List<ProductDto>> getAllProductsByRestaurantId(@PathVariable("restaurantId") Long restaurantId){
+        List<ProductDto> result = productService.getAllProductsByRestaurantId(restaurantId);
+        if(result.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/delete-by-id/{id}")
+    public ResponseEntity<?> deleteProductById(@PathVariable("id") Long id){
+        boolean result = productService.deleteProduct(id);
+        if(result){
+            return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }

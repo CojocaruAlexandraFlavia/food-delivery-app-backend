@@ -5,13 +5,19 @@ import com.example.fooddelivery.model.OrderProduct;
 import com.example.fooddelivery.model.Product;
 import com.example.fooddelivery.model.Restaurant;
 import com.example.fooddelivery.model.dto.ProductDto;
+import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.ProductRepository;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.stream.Collectors.toList;
 
 @Service
 public class ProductService {
@@ -76,6 +82,29 @@ public class ProductService {
             return ProductDto.entityToDto(productRepository.save(product));
         }
         return null;
+    }
+
+    public boolean deleteProduct(Long productId){
+        if(productId != null){
+            Optional<Product> optionalProduct = findProductById(productId);
+            if(optionalProduct.isPresent()){
+                productRepository.delete(optionalProduct.get());
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<ProductDto> getAllProducts() {
+        List<Product> allProducts = productRepository.findAll();
+        return allProducts.stream().map(ProductDto::entityToDto).collect(toList());
+    }
+
+    @Transactional
+    public List<ProductDto> getAllProductsByRestaurantId(Long restaurantId) {
+        Optional<Restaurant> optionalRestaurant = restaurantService.findRestaurantById(restaurantId);
+        return optionalRestaurant.map(restaurant -> restaurant.getProducts().stream()
+                .map(ProductDto::entityToDto).collect(toList())).orElseGet(ArrayList::new);
     }
 
     public ProductDto changeProductAvailability(Long productId){
