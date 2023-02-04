@@ -6,10 +6,12 @@ import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.ViewCartDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.model.dto.requests.SendOrder;
 import com.example.fooddelivery.model.dto.requests.UpdateCartProduct;
 import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
 import com.example.fooddelivery.service.DeliveryUserService;
 import com.example.fooddelivery.service.OrderService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +39,16 @@ public class OrderController {
 //    public ResponseEntity<OrderDto> saveOrder(@RequestBody OrderDto orderDto){
 //        return ResponseEntity.of(Optional.of(orderService.saveOrder(orderDto)));
 //    }
+
+    @PostMapping("/")
+    public ResponseEntity<OrderDto> updateOrderAddress(@NotNull SendOrder sendOrder){
+        return ResponseEntity.of(Optional.of(orderService.updateOrderAddress(sendOrder)));
+    }
+
+    @PostMapping("/send")
+    public ResponseEntity<OrderDto> sendOrder(@NotNull SendOrder sendOrder){
+        return ResponseEntity.of(Optional.of(orderService.sendOrder(sendOrder)));
+    }
 
     @GetMapping("/get-by-id/{id}")
     public ResponseEntity<OrderDto> findOrderById(@PathVariable("id") Long id){
@@ -95,6 +107,20 @@ public class OrderController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/cart/increase-quantity")
+    public ResponseEntity<ViewCartDto> increaseQuantityOfProduct(@RequestBody UpdateCartProduct updateCartProduct){
+        ViewCartDto result = orderService.increaseQuantityOfProduct(updateCartProduct.getProductId(), updateCartProduct.getClientId());
+        if(result == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    @DeleteMapping("/cart/delete-product")
+    public ResponseEntity<ViewCartDto> deleteProduct(@RequestBody UpdateCartProduct updateCartProduct){
+        orderService.deleteProduct(updateCartProduct.getProductId(), updateCartProduct.getClientId());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

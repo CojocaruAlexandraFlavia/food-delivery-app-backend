@@ -6,10 +6,12 @@ import com.example.fooddelivery.enums.PaymentType;
 import com.example.fooddelivery.model.*;
 import com.example.fooddelivery.model.dto.*;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
+import com.example.fooddelivery.model.dto.requests.SendOrder;
 import com.example.fooddelivery.repository.NotificationRepository;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.OrderRepository;
 import com.example.fooddelivery.repository.UserAddressRepository;
+import org.apache.catalina.User;
 import org.apache.commons.lang3.EnumUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,27 +99,32 @@ public class OrderService {
             Order updatedOrder = order.get();
             List<OrderProduct> orderProducts = updatedOrder.getProducts();
             OrderProduct orderProductUpdated = new OrderProduct();
-            for (OrderProduct orderProduct1: updatedOrder.getProducts()) {
+            Boolean isFound = false;
+            for (OrderProduct orderProduct1: orderProducts) {
                 if (orderProduct1.getProduct().getId().equals(productId)) {
-                    orderProductUpdated.setOrder(updatedOrder);
-                    orderProductUpdated.setProduct(product);
-                    orderProductUpdated.setQuantity(orderProduct1.getQuantity() - 1);
                     if (orderProduct1.getQuantity() - 1 == 0) {
                         System.out.println("da");
-                        orderProducts.remove(orderProductUpdated);
-                        updatedOrder.setProducts(orderProducts);
-                        updatedOrder = orderRepository.save(updatedOrder);
-                        orderProductRepository.delete(orderProductUpdated);
+                        // deleteProduct(product.getId(), clientId);
+                        orderProductRepository.deleteByOrderIdAndProductId(updatedOrder.getId(), product.getId());
 
                     } else {
-                        updatedOrder = orderRepository.save(updatedOrder);
+                        orderProductUpdated.setOrder(updatedOrder);
+                        orderProductUpdated.setProduct(product);
+                        orderProductUpdated.setQuantity(orderProduct1.getQuantity() - 1);
                         orderProductUpdated = orderProductRepository.save(orderProductUpdated);
-
                     }
-
+                    isFound = true;
                 }
             }
+            if(isFound){
+                double productPriceWithDiscountApplied = product.getPrice() -
+                        product.getDiscount() / 100 * product.getPrice();
+                updatedOrder.setValue(updatedOrder.getValue() - productPriceWithDiscountApplied);
+                orderRepository.save(updatedOrder);
+            }
 
+
+            //updateOrderPrice(updatedOrder);
 
             return viewCart(order.get().getClientUser().getId());
         }
@@ -126,34 +133,117 @@ public class OrderService {
     }
 
 
-    public OrderDto sendOrder(@NotNull Long clientId){
+    public ViewCartDto increaseQuantityOfProduct(Long productId, Long clientId){
+        Optional<Product> orderProduct = productService.findProductById(productId);
+        Optional<Order> order = getCurrentOpenOrder(clientId);
+
+        if(orderProduct.isPresent() && order.isPresent()){
+            Product product = orderProduct.get();
+            Order updatedOrder = order.get();
+            List<OrderProduct> orderProducts = updatedOrder.getProducts();
+            OrderProduct orderProductUpdated = new OrderProduct();
+            Boolean isFound = false;
+            for (OrderProduct orderProduct1: orderProducts) {
+                if (orderProduct1.getProduct().getId().equals(productId)) {
+                    orderProductUpdated.setOrder(updatedOrder);
+                    orderProductUpdated.setProduct(product);
+                    orderProductUpdated.setQuantity(orderProduct1.getQuantity() + 1);
+                    orderProductUpdated = orderProductRepository.save(orderProductUpdated);
+                    isFound = true;
+                }
+            }
+
+            if(isFound){
+                double productPriceWithDiscountApplied = product.getPrice() -
+                        product.getDiscount() / 100 * product.getPrice();
+                updatedOrder.setValue(updatedOrder.getValue() + productPriceWithDiscountApplied);
+                updatedOrder = orderRepository.save(updatedOrder);
+            }
+            //updateOrderPrice(updatedOrder);
+            return viewCart(order.get().getClientUser().getId());
+        }
+        return null;
+
+    }
+
+    public void deleteProduct(Long productId, Long clientId){
+        Optional<Product> orderProduct = productService.findProductById(productId);
+        Optional<Order> order = getCurrentOpenOrder(clientId);
+
+        if(orderProduct.isPresent() && order.isPresent()){
+            Product product = orderProduct.get();
+            Order updatedOrder = order.get();
+            List<OrderProduct> orderProducts = updatedOrder.getProducts();
+            boolean isFound = false;
+            int quantity = 0;
+            for (OrderProduct orderProduct1: orderProducts) {
+                if (orderProduct1.getProduct().getId().equals(productId)) {
+                    orderProductRepository.deleteByOrderIdAndProductId(updatedOrder.getId(), product.getId());
+                    quantity = orderProduct1.getQuantity();
+                    isFound = true;
+                }
+            }
+
+            if(isFound){
+                double productPriceWithDiscountApplied = product.getPrice() -
+                        product.getDiscount() / 100 * product.getPrice();
+                updatedOrder.setValue(updatedOrder.getValue() - (productPriceWithDiscountApplied * quantity));
+                orderRepository.save(updatedOrder);
+            }
+
+        }
+
+    }
+    public void updateOrderPrice(Order order){
+        List<OrderProduct> products = order.getProducts();
+        Double value = 0.0;
+        for (OrderProduct orderProduct1: products) {
+            Product product = orderProduct1.getProduct();
+            double productPriceWithDiscountApplied = product.getPrice() -
+                    product.getDiscount() / 100 * product.getPrice();
+            Double productValue = productPriceWithDiscountApplied * orderProduct1.getQuantity();
+            value = value + productValue;
+
+        }
+        order.setValue(value);
+        order.setTotalPrice(value + order.getDeliveryTax());
+        orderRepository.save(order);
+
+    }
+
+    public OrderDto updateOrderAddress(SendOrder sendOrder){
+        Long clientId = sendOrder.getClientId();
+        Long addressId = sendOrder.getAddressId();
+        System.out.println(clientId + " " +  addressId);
+        Optional<Order> order = getCurrentOpenOrder(clientId);
+        if(order.isPresent()) {
+            System.out.println("order is presnt");
+            Order currentOrder = order.get();
+            Optional<UserAddress> address = addressRepository.findById(addressId);
+            if (address.isPresent()) {
+                System.out.println("is present");
+                UserAddress userAddress = address.get();
+                currentOrder.setDeliveryAddress(userAddress);
+                return OrderDto.entityToDto(orderRepository.save(currentOrder));
+            }
+        }
+        return null;
+    }
+
+    public OrderDto sendOrder(SendOrder sendOrder){
+        Long clientId = sendOrder.getClientId();
         Optional<Order> order = getCurrentOpenOrder(clientId);
         if(order.isPresent()){
             Order currentOrder = order.get();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
-            order.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
-            order.setStatus(OrderStatus.RECEIVED);
-            order.setClientUser(optionalClientUser.get());
-            //order.setDeliveryUser(optionalDeliveryUser.get());
-            order.setPaymentType(PaymentType.valueOf(orderDto.getPaymentType()));
-            order.setDeliveryTax(orderDto.getDeliveryTax());
-            Order savedOrder = orderRepository.save(order);
             currentOrder.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
-            List<UserAddress> addresses = addressRepository.findByClientUserId(clientId);
-            Optional<UserAddress> userAddress = addresses.stream().filter(checkedAddress ->
-                    checkedAddress.getChecked().equals(true)).findAny();
-            if(userAddress.isPresent()) {
-                currentOrder.setDeliveryAddress(userAddress.get());
-                currentOrder.setStatus(OrderStatus.RECEIVED);
-
-                Notification notification = new Notification();
-                notification.setOrder(currentOrder);
-                notification.setType(NotificationType.ORDER_RECEIVED);
-                notification.setSeen(false);
-                notificationRepository.save(notification);
-                return OrderDto.entityToDto(orderRepository.save(currentOrder));
-
-            }
+            currentOrder.setStatus(OrderStatus.RECEIVED);
+            Notification notification = new Notification();
+            notification.setOrder(currentOrder);
+            notification.setType(NotificationType.ORDER_RECEIVED);
+            notification.setSeen(false);
+            notificationRepository.save(notification);
+            return OrderDto.entityToDto(orderRepository.save(currentOrder));
 
         }
         return null;
@@ -321,6 +411,7 @@ public class OrderService {
                         product.getDiscount() / 100 * product.getPrice();
             Double updatedValue = oldValue + (productPriceWithDiscountApplied * quantity);
             order.setValue(updatedValue);
+
 
             order = orderRepository.save(order);
             System.out.println(order.getDeliveryTax());

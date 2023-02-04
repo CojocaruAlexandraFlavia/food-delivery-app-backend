@@ -24,6 +24,7 @@ public class Order {
     private Double value;
     private Double deliveryTax;
     private LocalDateTime dateTime;
+    private Double totalPrice;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
