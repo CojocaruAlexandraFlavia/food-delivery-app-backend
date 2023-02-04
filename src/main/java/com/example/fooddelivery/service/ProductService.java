@@ -5,7 +5,6 @@ import com.example.fooddelivery.model.OrderProduct;
 import com.example.fooddelivery.model.Product;
 import com.example.fooddelivery.model.Restaurant;
 import com.example.fooddelivery.model.dto.ProductDto;
-import com.example.fooddelivery.model.dto.RestaurantDto;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.ProductRepository;
 import org.jetbrains.annotations.NotNull;

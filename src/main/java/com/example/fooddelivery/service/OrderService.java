@@ -199,11 +199,17 @@ public class OrderService {
     }
 
     public CheckOrderCountDto checkTotalCount() {
-        Long orders = (long) getAll().size();
+        List<Order> allOrders = getAll();
+        Long orders = (long) allOrders.size();
         double price = getTotalCounts();
         CheckOrderCountDto checkOrderCountDto =  new CheckOrderCountDto();
         checkOrderCountDto.setTotalCount(price);
         checkOrderCountDto.setNumberOfOrders(orders);
+        List<List<Product>> allOrderedProductsLists = allOrders.stream().map(order -> order.getProducts().stream()
+                .map(OrderProduct::getProduct).collect(toList())).collect(toList());
+        List<Product> products = allOrderedProductsLists.stream().flatMap(List::stream).collect(toList());
+        List<Product> distinctProducts = products.stream().distinct().collect(toList());
+        checkOrderCountDto.setNumberOfProducts((long) distinctProducts.size());
         return checkOrderCountDto;
     }
 

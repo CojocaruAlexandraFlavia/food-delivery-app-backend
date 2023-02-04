@@ -41,7 +41,9 @@ public class OrderDto {
         dto.setPaymentType(order.getPaymentType().toString());
         dto.setDeliveryTax(order.getDeliveryTax());
         dto.setDateTime(order.getDateTime().format(DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss")));
-        dto.setDeliveryAddress(UserAddressDto.entityToDto(order.getDeliveryAddress()));
+        if(order.getDeliveryAddress() != null) {
+            dto.setDeliveryAddress(UserAddressDto.entityToDto(order.getDeliveryAddress()));
+        }
 
         if(order.getProducts() != null) {
             dto.setProducts(order.getProducts()

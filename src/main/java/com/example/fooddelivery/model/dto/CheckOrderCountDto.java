@@ -9,13 +9,16 @@ import org.jetbrains.annotations.NotNull;
 @Getter
 @Setter
 public class CheckOrderCountDto {
+
     private Long numberOfOrders;
     private double totalCount;
+    private Long numberOfProducts;
 
-    public static @NotNull CheckOrderCountDto entityToDto(Long numberOfOrders, Long totalCount) {
+    public static @NotNull CheckOrderCountDto entityToDto(Long numberOfOrders, Long totalCount, Long numberOfProducts) {
         CheckOrderCountDto checkOrderCountDto = new CheckOrderCountDto();
         checkOrderCountDto.setNumberOfOrders(numberOfOrders);
         checkOrderCountDto.setTotalCount(totalCount);
+        checkOrderCountDto.setNumberOfProducts(numberOfProducts);
         return checkOrderCountDto;
     }
 }

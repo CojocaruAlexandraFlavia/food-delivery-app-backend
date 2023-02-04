@@ -37,7 +37,8 @@ public class RestaurantService {
     @Autowired
     public RestaurantService(RestaurantRepository restaurantRepository, LocationRepository locationRepository,
                              ReviewRepository reviewRepository, BaseUserRepository baseUserRepository,
-                             BaseUserService baseUserService, PasswordEncoder passwordEncoder, RestaurantManagerRepository restaurantManagerRepository) {
+                             BaseUserService baseUserService, PasswordEncoder passwordEncoder,
+                             RestaurantManagerRepository restaurantManagerRepository) {
         this.restaurantRepository = restaurantRepository;
         this.locationRepository = locationRepository;
         this.reviewRepository = reviewRepository;
@@ -194,4 +195,13 @@ public class RestaurantService {
         return restaurantManagers.stream().map(RestaurantManagerDto::entityToDto).collect(toList());
     }
 
+    public List<RestaurantDto> changeLocationAvailability(Long id) {
+        Optional<Location> optionalLocation = locationRepository.findById(id);
+        if(optionalLocation.isPresent()) {
+            Location location = optionalLocation.get();
+            location.setAvailability(!location.getAvailability());
+            locationRepository.save(location);
+        }
+        return getAllRestaurants();
+    }
 }
