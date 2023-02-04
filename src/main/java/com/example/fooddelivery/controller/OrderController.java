@@ -6,6 +6,7 @@ import com.example.fooddelivery.model.dto.NotificationDto;
 import com.example.fooddelivery.model.dto.ViewCartDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.model.dto.requests.AddUserAddressRequest;
 import com.example.fooddelivery.model.dto.requests.SendOrder;
 import com.example.fooddelivery.model.dto.requests.UpdateCartProduct;
 import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
@@ -40,13 +41,13 @@ public class OrderController {
 //        return ResponseEntity.of(Optional.of(orderService.saveOrder(orderDto)));
 //    }
 
-    @PostMapping("/")
-    public ResponseEntity<OrderDto> updateOrderAddress(@NotNull SendOrder sendOrder){
-        return ResponseEntity.of(Optional.of(orderService.updateOrderAddress(sendOrder)));
+    @PostMapping("/add-user-address")
+    public ResponseEntity<OrderDto> updateOrderAddress(@RequestBody AddUserAddressRequest addUserAddressRequest){
+        return ResponseEntity.of(Optional.of(orderService.updateOrderAddress(addUserAddressRequest)));
     }
 
     @PostMapping("/send")
-    public ResponseEntity<OrderDto> sendOrder(@NotNull SendOrder sendOrder){
+    public ResponseEntity<OrderDto> sendOrder(@RequestBody SendOrder sendOrder){
         return ResponseEntity.of(Optional.of(orderService.sendOrder(sendOrder)));
     }
 

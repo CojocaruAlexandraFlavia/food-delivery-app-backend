@@ -6,27 +6,22 @@ import com.example.fooddelivery.enums.PaymentType;
 import com.example.fooddelivery.model.*;
 import com.example.fooddelivery.model.dto.*;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
+import com.example.fooddelivery.model.dto.requests.AddUserAddressRequest;
 import com.example.fooddelivery.model.dto.requests.SendOrder;
 import com.example.fooddelivery.repository.NotificationRepository;
 import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.OrderRepository;
 import com.example.fooddelivery.repository.UserAddressRepository;
-import org.apache.catalina.User;
 import org.apache.commons.lang3.EnumUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toList;
 
 import static java.util.stream.Collectors.toList;
 
@@ -43,12 +38,13 @@ public class OrderService {
     private final DeliveryUserService deliveryUserService;
     private final UserAddressRepository addressRepository;
     private final RestaurantService restaurantService;
+    private final UserAddressRepository userAddressRepository;
 
     @Autowired
     public OrderService(OrderRepository orderRepository, NotificationRepository notificationRepository,
                         OrderProductRepository productRepository, ProductService productService,
                         ClientUserService clientUserService, DeliveryUserService deliveryUserService,
-                        UserAddressRepository addressRepository, RestaurantService restaurantService) {
+                        UserAddressRepository addressRepository, RestaurantService restaurantService, UserAddressRepository userAddressRepository) {
         this.orderRepository = orderRepository;
         this.notificationRepository = notificationRepository;
         this.orderProductRepository = productRepository;
@@ -57,6 +53,7 @@ public class OrderService {
         this.deliveryUserService = deliveryUserService;
         this.addressRepository = addressRepository;
         this.restaurantService = restaurantService;
+        this.userAddressRepository = userAddressRepository;
     }
 
     public Optional<Order> findOrderById(Long id) {
@@ -211,39 +208,53 @@ public class OrderService {
 
     }
 
-    public OrderDto updateOrderAddress(SendOrder sendOrder){
-        Long clientId = sendOrder.getClientId();
-        Long addressId = sendOrder.getAddressId();
-        System.out.println(clientId + " " +  addressId);
+    public OrderDto updateOrderAddress(AddUserAddressRequest addUserAddressRequest){
+        Long clientId = addUserAddressRequest.getClientId();
+        String city = addUserAddressRequest.getCity();
+        Integer zipCode = addUserAddressRequest.getZipCode();
+        String address = addUserAddressRequest.getAddress();
         Optional<Order> order = getCurrentOpenOrder(clientId);
         if(order.isPresent()) {
-            System.out.println("order is presnt");
-            Order currentOrder = order.get();
-            Optional<UserAddress> address = addressRepository.findById(addressId);
-            if (address.isPresent()) {
-                System.out.println("is present");
-                UserAddress userAddress = address.get();
+            Optional<ClientUser> clientUser = clientUserService.findClientUserById(clientId);
+            if(clientUser.isPresent()){
+                Order currentOrder = order.get();
+                UserAddress userAddress = new UserAddress();
+                userAddress.setAddress(address);
+                userAddress.setCity(city);
+                userAddress.setZipCode(zipCode);
+                userAddress.setClientUser(clientUser.get());
+
+                userAddressRepository.save(userAddress);
                 currentOrder.setDeliveryAddress(userAddress);
                 return OrderDto.entityToDto(orderRepository.save(currentOrder));
             }
+
+
         }
         return null;
     }
 
+
     public OrderDto sendOrder(SendOrder sendOrder){
         Long clientId = sendOrder.getClientId();
+        Long addressId = sendOrder.getAddressId();
         Optional<Order> order = getCurrentOpenOrder(clientId);
         if(order.isPresent()){
             Order currentOrder = order.get();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
             currentOrder.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
-            currentOrder.setStatus(OrderStatus.RECEIVED);
-            Notification notification = new Notification();
-            notification.setOrder(currentOrder);
-            notification.setType(NotificationType.ORDER_RECEIVED);
-            notification.setSeen(false);
-            notificationRepository.save(notification);
-            return OrderDto.entityToDto(orderRepository.save(currentOrder));
+            Optional<UserAddress> address = addressRepository.findById(addressId);
+            if (address.isPresent()) {
+                UserAddress userAddress = address.get();
+                currentOrder.setDeliveryAddress(userAddress);
+                currentOrder.setStatus(OrderStatus.RECEIVED);
+                Notification notification = new Notification();
+                notification.setOrder(currentOrder);
+                notification.setType(NotificationType.ORDER_RECEIVED);
+                notification.setSeen(false);
+                notificationRepository.save(notification);
+                return OrderDto.entityToDto(orderRepository.save(currentOrder));
+            }
 
         }
         return null;
