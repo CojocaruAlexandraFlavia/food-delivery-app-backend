@@ -23,6 +23,8 @@ public class RestaurantDto {
     private List<LocationDto> locations;
     private List<ReviewDto> reviews;
 
+    private List<ProductDto> products;
+
     public static @NotNull RestaurantDto entityToDto(@NotNull Restaurant restaurant) {
         RestaurantDto dto = new RestaurantDto();
         dto.setName(restaurant.getName());
@@ -42,6 +44,11 @@ public class RestaurantDto {
             dto.setReviews(restaurant.getReviews().stream().map(ReviewDto::entityToDto).collect(toList()));
         } else {
             dto.setReviews(new ArrayList<>());
+        }
+        if(restaurant.getProducts() != null){
+            dto.setProducts(restaurant.getProducts().stream().map(ProductDto::entityToDto).collect(toList()));
+        }else{
+            dto.setProducts(new ArrayList<>());
         }
 
         return dto;

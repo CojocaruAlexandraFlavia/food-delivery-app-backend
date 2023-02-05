@@ -3,11 +3,16 @@ package com.example.fooddelivery.controller;
 import com.example.fooddelivery.model.Order;
 import com.example.fooddelivery.model.dto.CheckOrderCountDto;
 import com.example.fooddelivery.model.dto.NotificationDto;
+import com.example.fooddelivery.model.dto.ViewCartDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.OrderDto;
+import com.example.fooddelivery.model.dto.requests.AddUserAddressRequest;
+import com.example.fooddelivery.model.dto.requests.SendOrder;
+import com.example.fooddelivery.model.dto.requests.UpdateCartProduct;
 import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
 import com.example.fooddelivery.service.DeliveryUserService;
 import com.example.fooddelivery.service.OrderService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,9 +36,19 @@ public class OrderController {
         this.deliveryUserService = deliveryUserService;
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<OrderDto> saveOrder(@RequestBody OrderDto orderDto){
-        return ResponseEntity.of(Optional.of(orderService.saveOrder(orderDto)));
+//    @PostMapping("/save")
+//    public ResponseEntity<OrderDto> saveOrder(@RequestBody OrderDto orderDto){
+//        return ResponseEntity.of(Optional.of(orderService.saveOrder(orderDto)));
+//    }
+
+    @PostMapping("/add-user-address")
+    public ResponseEntity<OrderDto> updateOrderAddress(@RequestBody AddUserAddressRequest addUserAddressRequest){
+        return ResponseEntity.of(Optional.of(orderService.updateOrderAddress(addUserAddressRequest)));
+    }
+
+    @PostMapping("/send")
+    public ResponseEntity<OrderDto> sendOrder(@RequestBody SendOrder sendOrder){
+        return ResponseEntity.of(Optional.of(orderService.sendOrder(sendOrder)));
     }
 
     @GetMapping("/get-by-id/{id}")
@@ -67,14 +82,61 @@ public class OrderController {
 
     @PutMapping("/add-products")
     public ResponseEntity<OrderDto> addOrderProduct(@RequestBody AddOrderProductRequest addOrderProductRequest){
-        OrderDto result = orderService.addOrderProduct(addOrderProductRequest.getOrderId(),
-                addOrderProductRequest.getOrderProductId(), addOrderProductRequest.getQuantity());
+
+        OrderDto result = orderService.addOrderProduct(addOrderProductRequest);
         if(result == null){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
 
     }
+
+    @GetMapping("/cart/{clientId}")
+    public ResponseEntity<ViewCartDto> viewCart(@PathVariable("clientId") Long id){
+        ViewCartDto result = orderService.viewCart(id);
+        if(result == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+
+    }
+
+    @PostMapping("/cart/decrease-quantity")
+    public ResponseEntity<ViewCartDto> decreaseQuantityOfProduct(@RequestBody UpdateCartProduct updateCartProduct){
+        ViewCartDto result = orderService.decreaseQuantityOfProduct(updateCartProduct.getProductId(), updateCartProduct.getClientId());
+        if(result == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/cart/increase-quantity")
+    public ResponseEntity<ViewCartDto> increaseQuantityOfProduct(@RequestBody UpdateCartProduct updateCartProduct){
+        ViewCartDto result = orderService.increaseQuantityOfProduct(updateCartProduct.getProductId(), updateCartProduct.getClientId());
+        if(result == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+    @DeleteMapping("/cart/delete-product")
+    public ResponseEntity<ViewCartDto> deleteProduct(@RequestBody UpdateCartProduct updateCartProduct){
+        ViewCartDto result = orderService.deleteProduct(updateCartProduct.getProductId(), updateCartProduct.getClientId());
+        if(result == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+
+//    @GetMapping("/current-order/{clientId}")
+//    public ResponseEntity<OrderDto> currentOrder(@PathVariable("clientId") Long id){
+//        Optional<OrderDto> result = orderService.getCurrentOpenOrder(id);
+//        if(result == null){
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
+//        return new ResponseEntity<>(result, HttpStatus.OK);
+//
+//    }
 
     @PatchMapping("/see-notification/{id}")
     public ResponseEntity<NotificationDto> seeNotification(@PathVariable("id") Long id) {

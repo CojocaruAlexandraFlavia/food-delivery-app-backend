@@ -13,7 +13,7 @@ public class UserAddress {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String city;
-    private Integer zipCode;
+    private String zipCode;
     private String address;
     private Boolean checked;
 

@@ -24,6 +24,7 @@ public class ProductDto {
     private Long restaurantId;
     private String restaurantName;
 
+
     public static @NotNull ProductDto entityToDto(@NotNull Product product) {
         ProductDto dto = new ProductDto();
         dto.setId(product.getId());
@@ -36,7 +37,9 @@ public class ProductDto {
 
         if(product.getRestaurant() != null) {
             dto.setRestaurantName(product.getRestaurant().getName());
+            dto.setRestaurantId(product.getRestaurant().getId());
         }
+
         return dto;
     }
 }

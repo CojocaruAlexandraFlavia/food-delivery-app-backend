@@ -69,7 +69,7 @@ public class ProductService {
         return null;
     }
 
-    public ProductDto updateProduct(Long productId, ProductDto productDto){
+    public ProductDto  updateProduct(Long productId, ProductDto productDto){
         Optional<Product> optionalProduct = findProductById(productId);
         if(optionalProduct.isPresent()){
             Product product = optionalProduct.get();
