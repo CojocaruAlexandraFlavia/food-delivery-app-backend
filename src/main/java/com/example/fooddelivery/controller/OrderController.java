@@ -120,8 +120,11 @@ public class OrderController {
     }
     @DeleteMapping("/cart/delete-product")
     public ResponseEntity<ViewCartDto> deleteProduct(@RequestBody UpdateCartProduct updateCartProduct){
-        orderService.deleteProduct(updateCartProduct.getProductId(), updateCartProduct.getClientId());
-        return new ResponseEntity<>(HttpStatus.OK);
+        ViewCartDto result = orderService.deleteProduct(updateCartProduct.getProductId(), updateCartProduct.getClientId());
+        if(result == null){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
 

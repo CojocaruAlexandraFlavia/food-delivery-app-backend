@@ -84,7 +84,7 @@ public class OrderService {
                 }else{
                     viewCartDto.setPaymentType("Online payment");
                 }
-                orderRepository.save(viewOrder);
+
                 return viewCartDto;
             }
         }
@@ -101,12 +101,14 @@ public class OrderService {
             Order updatedOrder = order.get();
             List<OrderProduct> orderProducts = updatedOrder.getProducts();
             OrderProduct orderProductUpdated = new OrderProduct();
+            OrderProduct removeOrderProduct = new OrderProduct();
             boolean isFound = false;
             for (OrderProduct orderProduct1: orderProducts) {
                 if (orderProduct1.getProduct().getId().equals(productId)) {
                     if (orderProduct1.getQuantity() - 1 == 0) {
                         System.out.println("da");
-                        // deleteProduct(product.getId(), clientId);
+                        removeOrderProduct = orderProduct1;
+
                         orderProductRepository.deleteByOrderIdAndProductId(updatedOrder.getId(), product.getId());
 
                     } else {
@@ -115,6 +117,7 @@ public class OrderService {
                         orderProductUpdated.setQuantity(orderProduct1.getQuantity() - 1);
                         orderProductUpdated = orderProductRepository.save(orderProductUpdated);
                     }
+
                     isFound = true;
                 }
             }
@@ -122,10 +125,11 @@ public class OrderService {
                 double productPriceWithDiscountApplied = product.getPrice() -
                         product.getDiscount() / 100 * product.getPrice();
                 updatedOrder.setValue(updatedOrder.getValue() - productPriceWithDiscountApplied);
-                orderRepository.save(updatedOrder);
+                updatedOrder.getProducts().remove(removeOrderProduct);
+                updatedOrder = orderRepository.save(updatedOrder);
+                return viewCart(updatedOrder.getClientUser().getId());
             }
 
-            return viewCart(order.get().getClientUser().getId());
         }
         return null;
 
@@ -156,19 +160,21 @@ public class OrderService {
                 double productPriceWithDiscountApplied = product.getPrice() -
                         product.getDiscount() / 100 * product.getPrice();
                 updatedOrder.setValue(updatedOrder.getValue() + productPriceWithDiscountApplied);
-                orderRepository.save(updatedOrder);
+                updatedOrder = orderRepository.save(updatedOrder);
+                return viewCart(updatedOrder.getClientUser().getId());
             }
 
-            return viewCart(order.get().getClientUser().getId());
+
         }
         return null;
 
     }
 
-    public void deleteProduct(Long productId, Long clientId){
+    public ViewCartDto deleteProduct(Long productId, Long clientId){
         Optional<Product> orderProduct = productService.findProductById(productId);
         Optional<Order> order = getCurrentOpenOrder(clientId);
 
+        OrderProduct removeOrderProduct = new OrderProduct();
         if(orderProduct.isPresent() && order.isPresent()){
             Product product = orderProduct.get();
             Order updatedOrder = order.get();
@@ -177,6 +183,7 @@ public class OrderService {
             int quantity = 0;
             for (OrderProduct orderProduct1: orderProducts) {
                 if (orderProduct1.getProduct().getId().equals(productId)) {
+                    removeOrderProduct = orderProduct1;
                     orderProductRepository.deleteByOrderIdAndProductId(updatedOrder.getId(), product.getId());
                     quantity = orderProduct1.getQuantity();
                     isFound = true;
@@ -186,12 +193,15 @@ public class OrderService {
             if(isFound){
                 double productPriceWithDiscountApplied = product.getPrice() -
                         product.getDiscount() / 100 * product.getPrice();
+                updatedOrder.getProducts().remove(removeOrderProduct);
                 updatedOrder.setValue(updatedOrder.getValue() - (productPriceWithDiscountApplied * quantity));
-                orderRepository.save(updatedOrder);
+                updatedOrder = orderRepository.save(updatedOrder);
+                return viewCart(updatedOrder.getClientUser().getId());
             }
 
         }
 
+        return null;
     }
 
     public OrderDto updateOrderAddress(AddUserAddressRequest addUserAddressRequest){

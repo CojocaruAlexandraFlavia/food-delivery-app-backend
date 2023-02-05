@@ -7,7 +7,9 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -30,6 +32,11 @@ public class ViewCartDto {
         dto.setDeliveryTax(order.getDeliveryTax());
         dto.setClientUserId(order.getClientUser().getId());
         dto.setOrderId(order.getId());
+        if(order.getProducts().isEmpty() || order.getProducts() == null){
+            dto.setProducts(new ArrayList<>());
+        }else{
+            dto.setProducts(order.getProducts().stream().map(OrderProductDto::entityToDto).collect(Collectors.toList()));
+        }
         if(order.getPaymentType().equals(PaymentType.CASH_ON_DELIVERY)){
             dto.setPaymentType("Cash on delivery");
         }else{
