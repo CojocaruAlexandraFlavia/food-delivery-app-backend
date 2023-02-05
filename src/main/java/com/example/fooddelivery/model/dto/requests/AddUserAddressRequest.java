@@ -6,6 +6,6 @@ import lombok.Data;
 public class AddUserAddressRequest {
     private Long clientId;
     private String city;
-    private Integer zipCode;
+    private String zipCode;
     private String address;
 }

@@ -11,7 +11,7 @@ public class UserAddressDto {
 
     private Long id;
     private String city;
-    private Integer zipCode;
+    private String zipCode;
     private String address;
 
     public static @NotNull UserAddressDto entityToDto(@NotNull UserAddress address) {

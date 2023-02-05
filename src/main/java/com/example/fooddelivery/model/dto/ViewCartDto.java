@@ -1,5 +1,6 @@
 package com.example.fooddelivery.model.dto;
 
+import com.example.fooddelivery.enums.PaymentType;
 import com.example.fooddelivery.model.Order;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +21,7 @@ public class ViewCartDto {
     private Double value;
     private Long clientUserId;
     private Long orderId;
+    private String paymentType;
 
     public static @NotNull ViewCartDto entityToDto(@NotNull Order order) {
         ViewCartDto dto = new ViewCartDto();
@@ -28,6 +30,12 @@ public class ViewCartDto {
         dto.setDeliveryTax(order.getDeliveryTax());
         dto.setClientUserId(order.getClientUser().getId());
         dto.setOrderId(order.getId());
+        if(order.getPaymentType().equals(PaymentType.CASH_ON_DELIVERY)){
+            dto.setPaymentType("Cash on delivery");
+        }else{
+            dto.setPaymentType("Online payment");
+        }
+
         return dto;
     }
 }

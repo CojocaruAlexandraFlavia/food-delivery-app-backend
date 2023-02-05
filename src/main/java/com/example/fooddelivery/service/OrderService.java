@@ -79,6 +79,11 @@ public class OrderService {
                 viewCartDto.setProducts(orderProducts);
                 viewCartDto.setValue(order.get().getValue());
                 viewCartDto.setDeliveryTax(order.get().getDeliveryTax());
+                if(order.get().getPaymentType().equals(PaymentType.CASH_ON_DELIVERY)){
+                    viewCartDto.setPaymentType("Cash on delivery");
+                }else{
+                    viewCartDto.setPaymentType("Online payment");
+                }
                 orderRepository.save(viewOrder);
                 return viewCartDto;
             }
@@ -96,7 +101,7 @@ public class OrderService {
             Order updatedOrder = order.get();
             List<OrderProduct> orderProducts = updatedOrder.getProducts();
             OrderProduct orderProductUpdated = new OrderProduct();
-            Boolean isFound = false;
+            boolean isFound = false;
             for (OrderProduct orderProduct1: orderProducts) {
                 if (orderProduct1.getProduct().getId().equals(productId)) {
                     if (orderProduct1.getQuantity() - 1 == 0) {
@@ -120,9 +125,6 @@ public class OrderService {
                 orderRepository.save(updatedOrder);
             }
 
-
-            //updateOrderPrice(updatedOrder);
-
             return viewCart(order.get().getClientUser().getId());
         }
         return null;
@@ -139,7 +141,7 @@ public class OrderService {
             Order updatedOrder = order.get();
             List<OrderProduct> orderProducts = updatedOrder.getProducts();
             OrderProduct orderProductUpdated = new OrderProduct();
-            Boolean isFound = false;
+            boolean isFound = false;
             for (OrderProduct orderProduct1: orderProducts) {
                 if (orderProduct1.getProduct().getId().equals(productId)) {
                     orderProductUpdated.setOrder(updatedOrder);
@@ -154,9 +156,9 @@ public class OrderService {
                 double productPriceWithDiscountApplied = product.getPrice() -
                         product.getDiscount() / 100 * product.getPrice();
                 updatedOrder.setValue(updatedOrder.getValue() + productPriceWithDiscountApplied);
-                updatedOrder = orderRepository.save(updatedOrder);
+                orderRepository.save(updatedOrder);
             }
-            //updateOrderPrice(updatedOrder);
+
             return viewCart(order.get().getClientUser().getId());
         }
         return null;
@@ -191,27 +193,11 @@ public class OrderService {
         }
 
     }
-    public void updateOrderPrice(Order order){
-        List<OrderProduct> products = order.getProducts();
-        Double value = 0.0;
-        for (OrderProduct orderProduct1: products) {
-            Product product = orderProduct1.getProduct();
-            double productPriceWithDiscountApplied = product.getPrice() -
-                    product.getDiscount() / 100 * product.getPrice();
-            Double productValue = productPriceWithDiscountApplied * orderProduct1.getQuantity();
-            value = value + productValue;
-
-        }
-        order.setValue(value);
-        order.setTotalPrice(value + order.getDeliveryTax());
-        orderRepository.save(order);
-
-    }
 
     public OrderDto updateOrderAddress(AddUserAddressRequest addUserAddressRequest){
         Long clientId = addUserAddressRequest.getClientId();
         String city = addUserAddressRequest.getCity();
-        Integer zipCode = addUserAddressRequest.getZipCode();
+        String zipCode = addUserAddressRequest.getZipCode();
         String address = addUserAddressRequest.getAddress();
         Optional<Order> order = getCurrentOpenOrder(clientId);
         if(order.isPresent()) {
@@ -243,6 +229,7 @@ public class OrderService {
             Order currentOrder = order.get();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
             currentOrder.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
+            currentOrder.setTotalPrice(currentOrder.getTotalPrice() + currentOrder.getDeliveryTax());
             Optional<UserAddress> address = addressRepository.findById(addressId);
             if (address.isPresent()) {
                 UserAddress userAddress = address.get();
@@ -306,6 +293,7 @@ public class OrderService {
         }
         return false;
     }
+
     //or create new open order
     public Optional<Order> getCurrentOpenOrder(Long clientId){
 
@@ -320,15 +308,10 @@ public class OrderService {
             deleteOrder(o.getId());
         }
 
-        Optional<Order> order = orders.stream().filter(matchOrder ->
+        return orders.stream().filter(matchOrder ->
                 matchOrder.getDateTime().toString().substring(0,10).equals(LocalDateTime.now().toString().substring(0,10))).filter(matchOrder ->
                 matchOrder.getStatus().equals(OrderStatus.OPEN)).findAny();
-        if(order.isPresent()){
-                System.out.println("are si OPEN");
-                return order;
-        }
 
-       return Optional.empty();
     }
 
 
@@ -352,7 +335,7 @@ public class OrderService {
             order.setClientUser(clientUser.get());
 
             order.setDeliveryTax(restaurant.get().getDeliveryTax());
-            order.setPaymentType(PaymentType.CARD_ONLINE);
+            order.setPaymentType(PaymentType.CASH_ON_DELIVERY);
             order.setValue(0.0);
             order.setNotifications(new ArrayList<>());
             order.setProducts(new ArrayList<>());
