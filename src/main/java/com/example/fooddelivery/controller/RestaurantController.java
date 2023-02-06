@@ -122,4 +122,10 @@ public class RestaurantController {
         List<RestaurantDto> result = restaurantService.changeLocationAvailability(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @GetMapping("/get-all-by-city/{city}")
+    public ResponseEntity<List<RestaurantDto>> getAllByCity(@PathVariable("city") String city) {
+        List<RestaurantDto> result = restaurantService.getAllByCity(city);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
 }

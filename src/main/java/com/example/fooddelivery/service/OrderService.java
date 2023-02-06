@@ -60,11 +60,6 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
-    public Optional<OrderProduct> findOrderProductById(Long id) {
-        return orderProductRepository.findById(id);
-    }
-
-
     public ViewCartDto viewCart(Long clientId){
         Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(clientId);
         ViewCartDto viewCartDto = new ViewCartDto();
@@ -239,7 +234,7 @@ public class OrderService {
             Order currentOrder = order.get();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
             currentOrder.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
-            currentOrder.setTotalPrice(currentOrder.getTotalPrice() + currentOrder.getDeliveryTax());
+            currentOrder.setTotalPrice(currentOrder.getValue() + currentOrder.getDeliveryTax());
             Optional<UserAddress> address = addressRepository.findById(addressId);
             if (address.isPresent()) {
                 UserAddress userAddress = address.get();
@@ -312,9 +307,7 @@ public class OrderService {
         List<Order> expiredOpenOrders = orders.stream().filter(matchOrder ->
                 matchOrder.getDateTime().toLocalDate().isBefore(LocalDateTime.now().toLocalDate()) && matchOrder.getStatus().equals(OrderStatus.OPEN)).collect(Collectors.toList());
         for (Order o: expiredOpenOrders) {
-            for(OrderProduct orderProduct : o.getProducts()){
-                orderProductRepository.delete(orderProduct);
-            }
+            orderProductRepository.deleteAll(o.getProducts());
             deleteOrder(o.getId());
         }
 
@@ -368,7 +361,7 @@ public class OrderService {
         OrderProduct orderProduct = new OrderProduct();
 
         Optional<Product> productOptional = productService.findProductById(productId);
-        Order order = new Order();
+        Order order;
 
 
         if(productOptional.isPresent()){
@@ -377,7 +370,7 @@ public class OrderService {
             if(optionalOrder.isPresent()){
                 System.out.println("order pre existent");
                 order = optionalOrder.get();
-                Boolean found = false;
+                boolean found = false;
                 for (OrderProduct orderProduct1: order.getProducts()) {
                     if(orderProduct1.getProduct().getId().equals(productId)){
                         orderProduct.setOrder(order);

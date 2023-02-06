@@ -16,6 +16,7 @@ public class BaseUserDto {
     private String email;
     private String role;
     private String phoneNumber;
+    private String preferredCity;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "password", nullable = false)

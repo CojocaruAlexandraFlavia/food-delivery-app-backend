@@ -184,6 +184,7 @@ public class RestaurantService {
             user.setFirstName(dto.getFirstName());
             user.setLastName(dto.getLastName());
             user.setRole(Role.ROLE_DELIVERY_USER);
+            user.setPreferredCity(dto.getPreferredCity());
             user = baseUserRepository.save(user);
             return DeliveryUserDto.entityToDto(user);
         }
@@ -203,5 +204,12 @@ public class RestaurantService {
             locationRepository.save(location);
         }
         return getAllRestaurants();
+    }
+
+    public List<RestaurantDto> getAllByCity(String city) {
+        List<RestaurantDto> restaurants = getAllRestaurants();
+        return restaurants.stream().filter(restaurantDto -> restaurantDto.getLocations()
+                .stream().anyMatch(locationDto -> locationDto.getCity().equalsIgnoreCase(city)))
+                .collect(toList());
     }
 }

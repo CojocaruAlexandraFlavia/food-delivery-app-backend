@@ -3,6 +3,7 @@ package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.dto.UserAddressDto;
 import com.example.fooddelivery.model.dto.user.AdminUserDto;
+import com.example.fooddelivery.model.dto.user.BaseUserDto;
 import com.example.fooddelivery.model.dto.user.ClientUserDto;
 import com.example.fooddelivery.service.BaseUserService;
 import com.example.fooddelivery.service.ClientUserService;
@@ -74,5 +75,16 @@ public class UserController {
             return new ResponseEntity<>(result, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PatchMapping("/change-preferred-city/")
+    public ResponseEntity<BaseUserDto> changePreferredCity(@RequestParam("newCity") String city,
+                                                           @RequestParam("userId") Long userId) {
+        BaseUserDto result = baseUserService.changePreferredCity(city, userId);
+        if(result == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+
     }
 }
