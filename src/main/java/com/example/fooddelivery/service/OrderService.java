@@ -13,6 +13,7 @@ import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.OrderRepository;
 import com.example.fooddelivery.repository.UserAddressRepository;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -127,9 +128,7 @@ public class OrderService {
 
         }
         return null;
-
     }
-
 
     public ViewCartDto increaseQuantityOfProduct(Long productId, Long clientId){
         Optional<Product> orderProduct = productService.findProductById(productId);
@@ -158,11 +157,8 @@ public class OrderService {
                 updatedOrder = orderRepository.save(updatedOrder);
                 return viewCart(updatedOrder.getClientUser().getId());
             }
-
-
         }
         return null;
-
     }
 
     public ViewCartDto deleteProduct(Long productId, Long clientId){
@@ -211,7 +207,7 @@ public class OrderService {
                 Order currentOrder = order.get();
                 UserAddress userAddress = new UserAddress();
                 userAddress.setAddress(address);
-                userAddress.setCity(city);
+                userAddress.setCity(StringUtils.capitalize(city.toLowerCase()));
                 userAddress.setZipCode(zipCode);
                 userAddress.setClientUser(clientUser.get());
 
@@ -219,12 +215,9 @@ public class OrderService {
                 currentOrder.setDeliveryAddress(userAddress);
                 return OrderDto.entityToDto(orderRepository.save(currentOrder));
             }
-
-
         }
         return null;
     }
-
 
     public OrderDto sendOrder(SendOrder sendOrder){
         Long clientId = sendOrder.getClientId();
@@ -247,11 +240,9 @@ public class OrderService {
                 notificationRepository.save(notification);
                 return OrderDto.entityToDto(orderRepository.save(currentOrder));
             }
-
         }
         return null;
     }
-
 
     public NotificationDto seeNotification(Long notificationId){
         Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
@@ -314,9 +305,7 @@ public class OrderService {
         return orders.stream().filter(matchOrder ->
                 matchOrder.getDateTime().toString().substring(0,10).equals(LocalDateTime.now().toString().substring(0,10))).filter(matchOrder ->
                 matchOrder.getStatus().equals(OrderStatus.OPEN)).findAny();
-
     }
-
 
     public Order createOpenOrder(Long clientId, Long restaurantId){
         Optional<ClientUser> clientUser = clientUserService.findClientUserById(clientId);
@@ -327,9 +316,9 @@ public class OrderService {
             //set order number
             Order lastSavedOrder = orderRepository.findFirstByOrderByIdDesc();
             if(lastSavedOrder != null) {
-                order.setNumber(lastSavedOrder.getNumber() + 1L);
+                order.setNumber(lastSavedOrder.getNumber() + 1);
             } else {
-                order.setNumber(1L);
+                order.setNumber(1);
             }
             //save order
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
@@ -347,10 +336,6 @@ public class OrderService {
         return null;
     }
 
-
-
-
-
     public OrderDto addOrderProduct(AddOrderProductRequest addOrderProductRequest){
 
         Long clientId = addOrderProductRequest.getClientId();
@@ -363,12 +348,10 @@ public class OrderService {
         Optional<Product> productOptional = productService.findProductById(productId);
         Order order;
 
-
         if(productOptional.isPresent()){
             Product product = productOptional.get();
             Long restaurantId = productOptional.get().getRestaurant().getId();
             if(optionalOrder.isPresent()){
-                System.out.println("order pre existent");
                 order = optionalOrder.get();
                 boolean found = false;
                 for (OrderProduct orderProduct1: order.getProducts()) {
@@ -388,10 +371,8 @@ public class OrderService {
                     List<OrderProduct> orderProducts = order.getProducts();
                     orderProducts.add(orderProduct);
                     order.setProducts(orderProducts);
-
                 }
-
-            }else {
+            } else {
                 order = createOpenOrder(clientId, restaurantId);
                 orderProduct.setOrder(order);
                 orderProduct.setQuantity(quantity);
@@ -400,7 +381,6 @@ public class OrderService {
                 List<OrderProduct> orderProducts = new ArrayList<>();
                 orderProducts.add(orderProduct);
                 order.setProducts(orderProducts);
-
             }
 
             Double oldValue =  order.getValue();
@@ -409,14 +389,11 @@ public class OrderService {
             Double updatedValue = oldValue + (productPriceWithDiscountApplied * quantity);
             order.setValue(updatedValue);
 
-
             order = orderRepository.save(order);
             System.out.println(order.getDeliveryTax());
             return OrderDto.entityToDto(order);
-
         }
-
-         return null;
+        return null;
     }
 
     public List<Order> getAll() {
@@ -430,16 +407,25 @@ public class OrderService {
 
     public CheckOrderCountDto checkTotalCount() {
         List<Order> allOrders = getAll();
-        Long orders = (long) allOrders.size();
+
         double price = getTotalCounts();
         CheckOrderCountDto checkOrderCountDto =  new CheckOrderCountDto();
         checkOrderCountDto.setTotalCount(price);
-        checkOrderCountDto.setNumberOfOrders(orders);
+        checkOrderCountDto.setNumberOfOrders((long) allOrders.size());
+
         List<List<Product>> allOrderedProductsLists = allOrders.stream().map(order -> order.getProducts().stream()
                 .map(OrderProduct::getProduct).collect(toList())).collect(toList());
         List<Product> products = allOrderedProductsLists.stream().flatMap(List::stream).collect(toList());
         List<Product> distinctProducts = products.stream().distinct().collect(toList());
         checkOrderCountDto.setNumberOfProducts((long) distinctProducts.size());
+
+        List<String> distinctOrdersCity = allOrders.stream().map(order -> order.getDeliveryAddress().getCity())
+                .distinct().collect(toList());
+        checkOrderCountDto.setNumberOfCities((long) distinctOrdersCity.size());
+
+        List<Restaurant> distinctOrdersRestaurants = allOrders.stream().map(order -> order.getProducts()
+                .get(0).getProduct().getRestaurant()).distinct().collect(toList());
+        checkOrderCountDto.setNumberOfRestaurants((long) distinctOrdersRestaurants.size());
         return checkOrderCountDto;
     }
 

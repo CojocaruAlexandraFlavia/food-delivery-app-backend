@@ -7,9 +7,6 @@ import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-
-import static java.util.stream.Collectors.toList;
 
 @Getter
 @Setter
@@ -17,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 public class CreateOpenOrderDto {
     private Long id;
     private String status;
-    private Long number;
+    private Integer number;
     private Double deliveryTax;
     private String dateTime;
     private Long clientUserId;
