@@ -102,18 +102,14 @@ public class OrderService {
             for (OrderProduct orderProduct1: orderProducts) {
                 if (orderProduct1.getProduct().getId().equals(productId)) {
                     if (orderProduct1.getQuantity() - 1 == 0) {
-                        System.out.println("da");
                         removeOrderProduct = orderProduct1;
-
                         orderProductRepository.deleteByOrderIdAndProductId(updatedOrder.getId(), product.getId());
-
                     } else {
                         orderProductUpdated.setOrder(updatedOrder);
                         orderProductUpdated.setProduct(product);
                         orderProductUpdated.setQuantity(orderProduct1.getQuantity() - 1);
                         orderProductUpdated = orderProductRepository.save(orderProductUpdated);
                     }
-
                     isFound = true;
                 }
             }
@@ -388,9 +384,7 @@ public class OrderService {
                         product.getDiscount() / 100 * product.getPrice();
             Double updatedValue = oldValue + (productPriceWithDiscountApplied * quantity);
             order.setValue(updatedValue);
-
             order = orderRepository.save(order);
-            System.out.println(order.getDeliveryTax());
             return OrderDto.entityToDto(order);
         }
         return null;
