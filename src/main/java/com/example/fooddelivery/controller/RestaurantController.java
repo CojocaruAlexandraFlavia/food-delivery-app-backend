@@ -6,6 +6,7 @@ import com.example.fooddelivery.model.dto.ReviewDto;
 import com.example.fooddelivery.model.dto.requests.AddLocationRequest;
 import com.example.fooddelivery.model.dto.user.DeliveryUserDto;
 import com.example.fooddelivery.model.dto.user.RestaurantManagerDto;
+import com.example.fooddelivery.service.LocationService;
 import com.example.fooddelivery.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -113,6 +114,18 @@ public class RestaurantController {
     @GetMapping("/managers")
     public ResponseEntity<List<RestaurantManagerDto>> getAllRestaurantManagers() {
         List<RestaurantManagerDto> result = restaurantService.getAllRestaurantManagers();
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PatchMapping("/change-location-availability/{locationId}")
+    public ResponseEntity<List<RestaurantDto>> changeLocationAvailability(@PathVariable("locationId") Long id) {
+        List<RestaurantDto> result = restaurantService.changeLocationAvailability(id);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/get-all-by-city/{city}")
+    public ResponseEntity<List<RestaurantDto>> getAllByCity(@PathVariable("city") String city) {
+        List<RestaurantDto> result = restaurantService.getAllByCity(city);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }

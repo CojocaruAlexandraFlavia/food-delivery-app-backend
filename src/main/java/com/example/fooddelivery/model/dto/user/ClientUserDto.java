@@ -32,6 +32,7 @@ public class ClientUserDto extends BaseUserDto{
         clientUserDto.setRole(Role.ROLE_CLIENT_USER.toString());
         clientUserDto.setPassword(clientUser.getPassword());
         clientUserDto.setPhoneNumber(clientUser.getPhoneNumber());
+        clientUserDto.setPreferredCity(clientUser.getPreferredCity());
 
         if(clientUser.getAddresses() != null) {
             clientUserDto.setAddresses(clientUser.getAddresses()

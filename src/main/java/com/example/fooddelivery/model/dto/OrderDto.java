@@ -19,7 +19,7 @@ public class OrderDto {
 
     private Long id;
     private String status;
-    private Long number;
+    private Integer number;
     private Double deliveryTax;
     private Double value;
     private String paymentType;

@@ -20,7 +20,7 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long number;
+    private Integer number;
     private Double value;
     private Double deliveryTax;
     private LocalDateTime dateTime;

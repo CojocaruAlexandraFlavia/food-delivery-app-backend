@@ -23,13 +23,13 @@ public class Restaurant {
     @ManyToOne
     private RestaurantManager restaurantManager;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.REMOVE)
     private List<Location> locations;
 
     @OneToMany(mappedBy = "restaurant")
     private List<Product> products;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.REMOVE)
     private List<Review> reviews;
 
     @PreRemove
@@ -39,4 +39,18 @@ public class Restaurant {
         this.reviews.forEach(review -> review.setRestaurant(null));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Restaurant)) return false;
+
+        Restaurant that = (Restaurant) o;
+
+        return getId() != null ? getId().equals(that.getId()) : that.getId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId() != null ? getId().hashCode() : 0;
+    }
 }

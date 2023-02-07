@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.toList;
 @Getter
 @Setter
 public class LocationDto {
+    private Long id;
     private Boolean availability;
     private String city;
     private String address;
@@ -21,6 +22,7 @@ public class LocationDto {
         dto.setCity(location.getCity());
         dto.setAddress(location.getAddress());
         dto.setRestaurantId(location.getRestaurant().getId());
+        dto.setId(location.getId());
         return dto;
     }
 }

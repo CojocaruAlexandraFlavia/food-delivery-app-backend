@@ -18,7 +18,7 @@ public class ViewCartDto {
 
     private UserAddressDto deliveryAddress;
     private List<OrderProductDto> products;
-    private Long number;
+    private Integer number;
     private Double deliveryTax;
     private Double value;
     private Long clientUserId;

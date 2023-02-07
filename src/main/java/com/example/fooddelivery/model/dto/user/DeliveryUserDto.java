@@ -27,6 +27,7 @@ public class DeliveryUserDto extends BaseUserDto{
         dto.setRole(Role.ROLE_DELIVERY_USER.toString());
         dto.setPassword(deliveryUser.getPassword());
         dto.setPhoneNumber(deliveryUser.getPhoneNumber());
+        dto.setPreferredCity(deliveryUser.getPreferredCity());
 
         if(deliveryUser.getOrders() != null) {
             dto.setOrders(deliveryUser.getOrders()

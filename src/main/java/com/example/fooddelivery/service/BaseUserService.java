@@ -5,6 +5,7 @@ import com.example.fooddelivery.model.dto.requests.UsernameAndPasswordAuthReques
 import com.example.fooddelivery.model.dto.user.*;
 import com.example.fooddelivery.repository.BaseUserRepository;
 import com.example.fooddelivery.util.JwtUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
@@ -100,4 +101,18 @@ public class BaseUserService implements UserDetailsService {
         return null;
     }
 
+    public BaseUserDto changePreferredCity(String city, Long userId) {
+        Optional<BaseUser> optionalBaseUser = findUserById(userId);
+        if(optionalBaseUser.isPresent()) {
+            BaseUser baseUser = optionalBaseUser.get();
+            baseUser.setPreferredCity(StringUtils.capitalize(city.toLowerCase()));
+            baseUser = baseUserRepository.save(baseUser);
+            if (baseUser instanceof ClientUser) {
+                return ClientUserDto.entityToDto((ClientUser) baseUser);
+            } else if (baseUser instanceof DeliveryUser) {
+                return DeliveryUserDto.entityToDto((DeliveryUser) baseUser);
+            }
+        }
+        return null;
+    }
 }

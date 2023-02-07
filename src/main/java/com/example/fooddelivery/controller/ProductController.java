@@ -1,11 +1,12 @@
 package com.example.fooddelivery.controller;
 
 import com.example.fooddelivery.model.Product;
-import com.example.fooddelivery.model.dto.RestaurantDto;
+import com.example.fooddelivery.model.dto.CategoryDto;
+import com.example.fooddelivery.model.dto.ProductDto;
 import com.example.fooddelivery.model.dto.requests.AddOrderProductRequest;
 import com.example.fooddelivery.model.dto.requests.AddProductToFavoritesRequest;
-import com.example.fooddelivery.model.dto.ProductDto;
 import com.example.fooddelivery.model.dto.user.ClientUserDto;
+import com.example.fooddelivery.service.CategoryService;
 import com.example.fooddelivery.service.ClientUserService;
 import com.example.fooddelivery.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +25,13 @@ public class ProductController {
 
     private final ProductService productService;
     private final ClientUserService clientUserService;
+    private final CategoryService categoryService;
 
     @Autowired
-    public ProductController(ProductService productService, ClientUserService clientUserService) {
+    public ProductController(ProductService productService, ClientUserService clientUserService, CategoryService categoryService) {
         this.productService = productService;
         this.clientUserService = clientUserService;
+        this.categoryService = categoryService;
     }
 
     @PostMapping("/save")
@@ -105,6 +108,12 @@ public class ProductController {
         if(result == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @GetMapping("/categories/all")
+    public ResponseEntity<List<CategoryDto>> getAllCategories() {
+        List<CategoryDto> result = categoryService.getAllCategories();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

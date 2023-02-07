@@ -27,6 +27,7 @@ public class BaseUser implements UserDetails {
     private String lastName;
     private String email;
     private String phoneNumber;
+    private String preferredCity;
 
     @Enumerated(EnumType.STRING)
     private Role role;

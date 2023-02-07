@@ -37,7 +37,8 @@ public class RestaurantService {
     @Autowired
     public RestaurantService(RestaurantRepository restaurantRepository, LocationRepository locationRepository,
                              ReviewRepository reviewRepository, BaseUserRepository baseUserRepository,
-                             BaseUserService baseUserService, PasswordEncoder passwordEncoder, RestaurantManagerRepository restaurantManagerRepository) {
+                             BaseUserService baseUserService, PasswordEncoder passwordEncoder,
+                             RestaurantManagerRepository restaurantManagerRepository) {
         this.restaurantRepository = restaurantRepository;
         this.locationRepository = locationRepository;
         this.reviewRepository = reviewRepository;
@@ -97,7 +98,12 @@ public class RestaurantService {
         if(restaurantId != null){
             Optional<Restaurant> optionalRestaurant = findRestaurantById(restaurantId);
             if(optionalRestaurant.isPresent()){
-                restaurantRepository.delete(optionalRestaurant.get());
+                Restaurant restaurant = optionalRestaurant.get();
+                restaurant.getProducts().forEach(product -> {
+                    product.setRestaurant(null);
+                    product.setAvailability(false);
+                });
+                restaurantRepository.delete(restaurant);
                 return true;
             }
         }
@@ -121,9 +127,11 @@ public class RestaurantService {
         return null;
     }
 
-
     public List<RestaurantDto> getAllRestaurants() {
         List<Restaurant> allRestaurants = restaurantRepository.findAll();
+//                .stream()
+//                .filter(restaurant -> restaurant.getLocations().stream()
+//                        .anyMatch(Location::getAvailability)).collect(toList());
         return allRestaurants.stream().map(RestaurantDto::entityToDto).collect(toList());
     }
 
@@ -183,6 +191,7 @@ public class RestaurantService {
             user.setFirstName(dto.getFirstName());
             user.setLastName(dto.getLastName());
             user.setRole(Role.ROLE_DELIVERY_USER);
+            user.setPreferredCity(dto.getPreferredCity());
             user = baseUserRepository.save(user);
             return DeliveryUserDto.entityToDto(user);
         }
@@ -194,4 +203,20 @@ public class RestaurantService {
         return restaurantManagers.stream().map(RestaurantManagerDto::entityToDto).collect(toList());
     }
 
+    public List<RestaurantDto> changeLocationAvailability(Long id) {
+        Optional<Location> optionalLocation = locationRepository.findById(id);
+        if(optionalLocation.isPresent()) {
+            Location location = optionalLocation.get();
+            location.setAvailability(!location.getAvailability());
+            locationRepository.save(location);
+        }
+        return getAllRestaurants();
+    }
+
+    public List<RestaurantDto> getAllByCity(String city) {
+        List<RestaurantDto> restaurants = getAllRestaurants();
+        return restaurants.stream().filter(restaurantDto -> restaurantDto.getLocations()
+                .stream().anyMatch(locationDto -> locationDto.getCity().equalsIgnoreCase(city)))
+                .collect(toList());
+    }
 }

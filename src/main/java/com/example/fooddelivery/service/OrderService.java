@@ -13,6 +13,7 @@ import com.example.fooddelivery.repository.OrderProductRepository;
 import com.example.fooddelivery.repository.OrderRepository;
 import com.example.fooddelivery.repository.UserAddressRepository;
 import org.apache.commons.lang3.EnumUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -60,11 +61,6 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
-    public Optional<OrderProduct> findOrderProductById(Long id) {
-        return orderProductRepository.findById(id);
-    }
-
-
     public ViewCartDto viewCart(Long clientId){
         Optional<ClientUser> optionalClientUser = clientUserService.findClientUserById(clientId);
         ViewCartDto viewCartDto = new ViewCartDto();
@@ -106,18 +102,14 @@ public class OrderService {
             for (OrderProduct orderProduct1: orderProducts) {
                 if (orderProduct1.getProduct().getId().equals(productId)) {
                     if (orderProduct1.getQuantity() - 1 == 0) {
-                        System.out.println("da");
                         removeOrderProduct = orderProduct1;
-
                         orderProductRepository.deleteByOrderIdAndProductId(updatedOrder.getId(), product.getId());
-
                     } else {
                         orderProductUpdated.setOrder(updatedOrder);
                         orderProductUpdated.setProduct(product);
                         orderProductUpdated.setQuantity(orderProduct1.getQuantity() - 1);
                         orderProductUpdated = orderProductRepository.save(orderProductUpdated);
                     }
-
                     isFound = true;
                 }
             }
@@ -132,9 +124,7 @@ public class OrderService {
 
         }
         return null;
-
     }
-
 
     public ViewCartDto increaseQuantityOfProduct(Long productId, Long clientId){
         Optional<Product> orderProduct = productService.findProductById(productId);
@@ -163,11 +153,8 @@ public class OrderService {
                 updatedOrder = orderRepository.save(updatedOrder);
                 return viewCart(updatedOrder.getClientUser().getId());
             }
-
-
         }
         return null;
-
     }
 
     public ViewCartDto deleteProduct(Long productId, Long clientId){
@@ -216,7 +203,7 @@ public class OrderService {
                 Order currentOrder = order.get();
                 UserAddress userAddress = new UserAddress();
                 userAddress.setAddress(address);
-                userAddress.setCity(city);
+                userAddress.setCity(StringUtils.capitalize(city.toLowerCase()));
                 userAddress.setZipCode(zipCode);
                 userAddress.setClientUser(clientUser.get());
 
@@ -224,12 +211,9 @@ public class OrderService {
                 currentOrder.setDeliveryAddress(userAddress);
                 return OrderDto.entityToDto(orderRepository.save(currentOrder));
             }
-
-
         }
         return null;
     }
-
 
     public OrderDto sendOrder(SendOrder sendOrder){
         Long clientId = sendOrder.getClientId();
@@ -239,7 +223,7 @@ public class OrderService {
             Order currentOrder = order.get();
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
             currentOrder.setDateTime(LocalDateTime.from(dateTimeFormatter.parse(LocalDateTime.now().format(dateTimeFormatter))));
-            currentOrder.setTotalPrice(currentOrder.getTotalPrice() + currentOrder.getDeliveryTax());
+            currentOrder.setTotalPrice(currentOrder.getValue() + currentOrder.getDeliveryTax());
             Optional<UserAddress> address = addressRepository.findById(addressId);
             if (address.isPresent()) {
                 UserAddress userAddress = address.get();
@@ -252,11 +236,9 @@ public class OrderService {
                 notificationRepository.save(notification);
                 return OrderDto.entityToDto(orderRepository.save(currentOrder));
             }
-
         }
         return null;
     }
-
 
     public NotificationDto seeNotification(Long notificationId){
         Optional<Notification> optionalNotification = notificationRepository.findById(notificationId);
@@ -312,18 +294,14 @@ public class OrderService {
         List<Order> expiredOpenOrders = orders.stream().filter(matchOrder ->
                 matchOrder.getDateTime().toLocalDate().isBefore(LocalDateTime.now().toLocalDate()) && matchOrder.getStatus().equals(OrderStatus.OPEN)).collect(Collectors.toList());
         for (Order o: expiredOpenOrders) {
-            for(OrderProduct orderProduct : o.getProducts()){
-                orderProductRepository.delete(orderProduct);
-            }
+            orderProductRepository.deleteAll(o.getProducts());
             deleteOrder(o.getId());
         }
 
         return orders.stream().filter(matchOrder ->
                 matchOrder.getDateTime().toString().substring(0,10).equals(LocalDateTime.now().toString().substring(0,10))).filter(matchOrder ->
                 matchOrder.getStatus().equals(OrderStatus.OPEN)).findAny();
-
     }
-
 
     public Order createOpenOrder(Long clientId, Long restaurantId){
         Optional<ClientUser> clientUser = clientUserService.findClientUserById(clientId);
@@ -334,9 +312,9 @@ public class OrderService {
             //set order number
             Order lastSavedOrder = orderRepository.findFirstByOrderByIdDesc();
             if(lastSavedOrder != null) {
-                order.setNumber(lastSavedOrder.getNumber() + 1L);
+                order.setNumber(lastSavedOrder.getNumber() + 1);
             } else {
-                order.setNumber(1L);
+                order.setNumber(1);
             }
             //save order
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
@@ -354,10 +332,6 @@ public class OrderService {
         return null;
     }
 
-
-
-
-
     public OrderDto addOrderProduct(AddOrderProductRequest addOrderProductRequest){
 
         Long clientId = addOrderProductRequest.getClientId();
@@ -368,16 +342,14 @@ public class OrderService {
         OrderProduct orderProduct = new OrderProduct();
 
         Optional<Product> productOptional = productService.findProductById(productId);
-        Order order = new Order();
-
+        Order order;
 
         if(productOptional.isPresent()){
             Product product = productOptional.get();
             Long restaurantId = productOptional.get().getRestaurant().getId();
             if(optionalOrder.isPresent()){
-                System.out.println("order pre existent");
                 order = optionalOrder.get();
-                Boolean found = false;
+                boolean found = false;
                 for (OrderProduct orderProduct1: order.getProducts()) {
                     if(orderProduct1.getProduct().getId().equals(productId)){
                         orderProduct.setOrder(order);
@@ -395,10 +367,8 @@ public class OrderService {
                     List<OrderProduct> orderProducts = order.getProducts();
                     orderProducts.add(orderProduct);
                     order.setProducts(orderProducts);
-
                 }
-
-            }else {
+            } else {
                 order = createOpenOrder(clientId, restaurantId);
                 orderProduct.setOrder(order);
                 orderProduct.setQuantity(quantity);
@@ -407,7 +377,6 @@ public class OrderService {
                 List<OrderProduct> orderProducts = new ArrayList<>();
                 orderProducts.add(orderProduct);
                 order.setProducts(orderProducts);
-
             }
 
             Double oldValue =  order.getValue();
@@ -415,15 +384,10 @@ public class OrderService {
                         product.getDiscount() / 100 * product.getPrice();
             Double updatedValue = oldValue + (productPriceWithDiscountApplied * quantity);
             order.setValue(updatedValue);
-
-
             order = orderRepository.save(order);
-            System.out.println(order.getDeliveryTax());
             return OrderDto.entityToDto(order);
-
         }
-
-         return null;
+        return null;
     }
 
     public List<Order> getAll() {
@@ -436,11 +400,26 @@ public class OrderService {
     }
 
     public CheckOrderCountDto checkTotalCount() {
-        Long orders = (long) getAll().size();
+        List<Order> allOrders = getAll();
+
         double price = getTotalCounts();
         CheckOrderCountDto checkOrderCountDto =  new CheckOrderCountDto();
         checkOrderCountDto.setTotalCount(price);
-        checkOrderCountDto.setNumberOfOrders(orders);
+        checkOrderCountDto.setNumberOfOrders((long) allOrders.size());
+
+        List<List<Product>> allOrderedProductsLists = allOrders.stream().map(order -> order.getProducts().stream()
+                .map(OrderProduct::getProduct).collect(toList())).collect(toList());
+        List<Product> products = allOrderedProductsLists.stream().flatMap(List::stream).collect(toList());
+        List<Product> distinctProducts = products.stream().distinct().collect(toList());
+        checkOrderCountDto.setNumberOfProducts((long) distinctProducts.size());
+
+        List<String> distinctOrdersCity = allOrders.stream().map(order -> order.getDeliveryAddress().getCity())
+                .distinct().collect(toList());
+        checkOrderCountDto.setNumberOfCities((long) distinctOrdersCity.size());
+
+        List<Restaurant> distinctOrdersRestaurants = allOrders.stream().map(order -> order.getProducts()
+                .get(0).getProduct().getRestaurant()).distinct().collect(toList());
+        checkOrderCountDto.setNumberOfRestaurants((long) distinctOrdersRestaurants.size());
         return checkOrderCountDto;
     }
 
