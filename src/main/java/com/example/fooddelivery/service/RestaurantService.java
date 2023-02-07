@@ -98,7 +98,8 @@ public class RestaurantService {
         if(restaurantId != null){
             Optional<Restaurant> optionalRestaurant = findRestaurantById(restaurantId);
             if(optionalRestaurant.isPresent()){
-                restaurantRepository.delete(optionalRestaurant.get());
+                Restaurant restaurant = optionalRestaurant.get();
+                restaurant.getLocations().forEach(location -> location.setAvailability(false));
                 return true;
             }
         }
@@ -122,9 +123,10 @@ public class RestaurantService {
         return null;
     }
 
-
     public List<RestaurantDto> getAllRestaurants() {
-        List<Restaurant> allRestaurants = restaurantRepository.findAll();
+        List<Restaurant> allRestaurants = restaurantRepository.findAll().stream()
+                .filter(restaurant -> restaurant.getLocations().stream()
+                        .anyMatch(Location::getAvailability)).collect(toList());
         return allRestaurants.stream().map(RestaurantDto::entityToDto).collect(toList());
     }
 
