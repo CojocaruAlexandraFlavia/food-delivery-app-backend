@@ -23,13 +23,13 @@ public class Restaurant {
     @ManyToOne
     private RestaurantManager restaurantManager;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.REMOVE)
     private List<Location> locations;
 
     @OneToMany(mappedBy = "restaurant")
     private List<Product> products;
 
-    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.REMOVE)
     private List<Review> reviews;
 
     @PreRemove
