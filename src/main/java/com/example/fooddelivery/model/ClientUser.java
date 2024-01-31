@@ -26,11 +26,19 @@ public class ClientUser extends BaseUser {
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(name = "users_favorite_products",
             joinColumns = {
-                    @JoinColumn(name = "user_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)},
+                    @JoinColumn(
+                            name = "user_id",
+                            referencedColumnName = "id",
+                            foreignKey = @ForeignKey(name = "fk_client_favorites"),
+                            nullable = false,
+                            updatable = false
+                    )},
             inverseJoinColumns = {
-                    @JoinColumn(name = "product_id", referencedColumnName = "id",
-                            nullable = false, updatable = false)})
+                    @JoinColumn(name = "product_id",
+                            referencedColumnName = "id",
+                            foreignKey = @ForeignKey(name = "fk_product_favorites"),
+                            nullable = false,
+                            updatable = false)})
     private Set<Product> products = new HashSet<>();
 
     public void addProductToFavoritesList(Product product) {

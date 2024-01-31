@@ -52,6 +52,7 @@ public class ClientUserService {
             clientUser.setLastName(dto.getLastName());
             clientUser.setRole(Role.ROLE_CLIENT_USER);
             clientUser.setPreferredCity(dto.getPreferredCity());
+            clientUser.setPhoneNumber(dto.getPhoneNumber());
             clientUser = clientUserRepository.save(clientUser);
             return clientUser;
         }

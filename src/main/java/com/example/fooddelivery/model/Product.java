@@ -13,6 +13,7 @@ import java.util.Set;
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "seq_product", sequenceName = "seq_product")
     private Long id;
     private Double price;
     private String name;
@@ -21,9 +22,17 @@ public class Product {
     private boolean availability;
 
     @ManyToOne
+    @JoinColumn(
+            name = "category_id",
+            foreignKey = @ForeignKey(name = "fk_category_product")
+    )
     private Category category;
 
     @ManyToOne
+    @JoinColumn(
+            name = "restaurant_id",
+            foreignKey = @ForeignKey(name = "fk_restaurant_product")
+    )
     private Restaurant restaurant;
 
     @ManyToMany(mappedBy = "products")

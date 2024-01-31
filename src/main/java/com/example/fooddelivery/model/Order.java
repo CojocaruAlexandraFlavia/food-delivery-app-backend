@@ -14,13 +14,14 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "placed_order")
+@Table(name = "orders")
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "seq_order", sequenceName = "seq_order")
     private Long id;
-    private Integer number;
+    private Integer orderNumber;
     private Double value;
     private Double deliveryTax;
     private LocalDateTime dateTime;
@@ -39,12 +40,24 @@ public class Order {
     private List<OrderProduct> products;
 
     @ManyToOne
+    @JoinColumn(
+            name = "client_id",
+            foreignKey = @ForeignKey(name = "fk_client_order")
+    )
     private ClientUser clientUser;
 
     @ManyToOne
+    @JoinColumn(
+            name = "delivery_user_id",
+            foreignKey = @ForeignKey(name = "fk_delivery_user_order")
+    )
     private DeliveryUser deliveryUser;
 
     @ManyToOne
+    @JoinColumn(
+            name = "delivery_address_id",
+            foreignKey = @ForeignKey(name = "fk_delivery_address_order")
+    )
     private UserAddress deliveryAddress;
 
 }

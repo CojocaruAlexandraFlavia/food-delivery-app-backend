@@ -160,7 +160,7 @@ public class RestaurantService {
                 review.setRestaurant(restaurant);
                 review.setClientUser(clientUser);
                 review.setStars(dto.getStars());
-                review.setComment(dto.getComment());
+                review.setMessage(dto.getMessage());
                 return ReviewDto.entityToDto(reviewRepository.save(review));
             }
         }

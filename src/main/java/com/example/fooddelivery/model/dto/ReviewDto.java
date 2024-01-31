@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 public class ReviewDto {
 
     private int stars;
-    private String comment;
+    private String message;
     private Long clientUserId;
     private Long restaurantId;
 
@@ -20,7 +20,7 @@ public class ReviewDto {
 
     public static @NotNull ReviewDto entityToDto(@NotNull Review review) {
         ReviewDto dto = new ReviewDto();
-        dto.setComment(review.getComment());
+        dto.setMessage(review.getMessage());
         dto.setStars(review.getStars());
         dto.setClientUserId(review.getClientUser().getId());
         dto.setRestaurantId(review.getRestaurant().getId());

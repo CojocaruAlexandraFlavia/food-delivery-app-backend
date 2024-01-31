@@ -21,6 +21,7 @@ import static java.util.Collections.singletonList;
 public class BaseUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(sequenceName = "seq_user", name = "seq_user")
     private Long id;
     private String password;
     private String firstName;

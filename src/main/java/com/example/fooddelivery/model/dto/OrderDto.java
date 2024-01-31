@@ -36,7 +36,7 @@ public class OrderDto {
         OrderDto dto = new OrderDto();
         dto.setId(order.getId());
         dto.setStatus(order.getStatus().toString());
-        dto.setNumber(order.getNumber());
+        dto.setNumber(order.getOrderNumber());
         dto.setValue(order.getValue());
         dto.setPaymentType(order.getPaymentType().toString());
         dto.setDeliveryTax(order.getDeliveryTax());

@@ -12,6 +12,7 @@ import java.util.List;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "seq_category", sequenceName = "seq_category")
     private Long id;
     private String name;
 

@@ -13,6 +13,7 @@ public class Restaurant {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "seq_restaurant", sequenceName = "seq_restaurant")
     private Long id;
 
     private String name;
@@ -21,6 +22,10 @@ public class Restaurant {
     private Double deliveryTax;
 
     @ManyToOne
+    @JoinColumn(
+            name = "restaurant_manager_id",
+            foreignKey = @ForeignKey(name = "fk_manager_restaurant")
+    )
     private RestaurantManager restaurantManager;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.REMOVE)

@@ -25,7 +25,7 @@ public class CreateOpenOrderDto {
         CreateOpenOrderDto dto = new CreateOpenOrderDto();
         dto.setId(order.getId());
         dto.setStatus(order.getStatus().toString());
-        dto.setNumber(order.getNumber());
+        dto.setNumber(order.getOrderNumber());
         dto.setDeliveryTax(order.getDeliveryTax());
         dto.setDateTime(order.getDateTime().format(DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss")));
         dto.setClientUserId(order.getClientUser().getId());

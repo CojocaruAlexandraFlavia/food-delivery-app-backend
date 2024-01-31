@@ -28,7 +28,7 @@ public class ViewCartDto {
     public static @NotNull ViewCartDto entityToDto(@NotNull Order order) {
         ViewCartDto dto = new ViewCartDto();
 
-        dto.setNumber(order.getNumber());
+        dto.setNumber(order.getOrderNumber());
         dto.setDeliveryTax(order.getDeliveryTax());
         dto.setClientUserId(order.getClientUser().getId());
         dto.setOrderId(order.getId());

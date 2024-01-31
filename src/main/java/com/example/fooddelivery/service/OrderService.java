@@ -70,7 +70,7 @@ public class OrderService {
             if(order.isPresent()){
                 Order viewOrder = order.get();
                 viewCartDto.setOrderId(viewOrder.getId());
-                viewCartDto.setNumber(viewOrder.getNumber());
+                viewCartDto.setNumber(viewOrder.getOrderNumber());
                 List<OrderProductDto> orderProducts = viewOrder.getProducts().stream().map(OrderProductDto::entityToDto).collect(toList());
                 viewCartDto.setProducts(orderProducts);
                 viewCartDto.setValue(order.get().getValue());
@@ -312,9 +312,9 @@ public class OrderService {
             //set order number
             Order lastSavedOrder = orderRepository.findFirstByOrderByIdDesc();
             if(lastSavedOrder != null) {
-                order.setNumber(lastSavedOrder.getNumber() + 1);
+                order.setOrderNumber(lastSavedOrder.getOrderNumber() + 1);
             } else {
-                order.setNumber(1);
+                order.setOrderNumber(1);
             }
             //save order
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss");
@@ -381,7 +381,7 @@ public class OrderService {
 
             Double oldValue =  order.getValue();
             double productPriceWithDiscountApplied = product.getPrice() -
-                        product.getDiscount() / 100 * product.getPrice();
+                        product.getDiscount() * product.getPrice();
             Double updatedValue = oldValue + (productPriceWithDiscountApplied * quantity);
             order.setValue(updatedValue);
             order = orderRepository.save(order);

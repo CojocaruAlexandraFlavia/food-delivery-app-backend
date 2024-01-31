@@ -13,6 +13,7 @@ public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "seq_notification", sequenceName = "seq_notification")
     private Long id;
     private Boolean seen;
 
@@ -20,6 +21,12 @@ public class Notification {
     private NotificationType type;
 
     @ManyToOne
+    @JoinColumn(
+            name = "order_id",
+            foreignKey = @ForeignKey(
+                    name = "fk_order_notification"
+            )
+    )
     private Order order;
 
 }
